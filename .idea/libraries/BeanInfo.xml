@@ -1,0 +1,27 @@
+<component name="libraryTable">
+  <library name="BeanInfo">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/BeanInfo.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/clientos.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/commonos.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/hessian-3.1.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/hsqldb.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/itext-1.4.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/iText-2.1.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/iText-rtf-2.1.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/jcalendar.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/jnlp.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/jnlp-servlet.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/log4j-1.2.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/poi-2.0-RC2-20040102.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/pooler.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/serveros.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/libs/srcclientos.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/srccommonos.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/srcserveros.jar!/" />
+    </SOURCES>
+  </library>
+</component>
