@@ -13,7 +13,6 @@ abstract class BaseUI(builder: UIBuilder) : JFrame(builder.uiName) {
             minimumSize = builder.minimumSize
 
         defaultCloseOperation = EXIT_ON_CLOSE
-        isVisible = true
     }
 
     protected fun addMenu(vararg menu : Menu) {

@@ -1,3 +1,3 @@
 package com.virtualightning.fileresolver.interfaces
 
-//typealias Callback = (Boolean,Any?) -> Unit
+typealias ICallback<E> =  (Boolean,E?) -> Unit
