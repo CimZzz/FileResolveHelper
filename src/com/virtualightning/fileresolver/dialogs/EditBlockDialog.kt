@@ -4,22 +4,14 @@ import com.virtualightning.fileresolver.base.BaseDialog
 import com.virtualightning.fileresolver.base.BaseUI
 import com.virtualightning.fileresolver.base.UIBuilder
 import com.virtualightning.fileresolver.entity.Block
+import com.virtualightning.fileresolver.entity.Format
 import com.virtualightning.fileresolver.environment.Context
-import com.virtualightning.fileresolver.interfaces.ICallback
-import com.virtualightning.fileresolver.utils.Info
+import com.virtualightning.fileresolver.interfaces.NullCallback
 import com.virtualightning.fileresolver.widget.BlockListModel
 import java.awt.BorderLayout
-import java.awt.Color
 import java.awt.Component
 import java.awt.Dimension
-import javax.swing.BoxLayout
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.JPanel
-import java.awt.Component.CENTER_ALIGNMENT
-import java.awt.SystemColor.text
-import javax.swing.JButton
-
+import javax.swing.*
 
 
 private val builder = UIBuilder(
@@ -28,14 +20,14 @@ private val builder = UIBuilder(
         size = Dimension(500,300)
 )
 
-class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<Any>(builder,baseUI,callback) {
+class EditBlockDialog(baseUI : BaseUI,val block : Block) : BaseDialog<Any>(builder,baseUI,NullCallback) {
     val upBtn : JButton
     val downBtn : JButton
     val newBtn : JButton
     val editBtn : JButton
     val delBtn : JButton
 
-    val blockList : JList<Block> = JList()
+    val formatTable: JTable = JTable()
     var lastSelection : Int = -1
 
     init {
@@ -50,9 +42,7 @@ class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<An
             NewBlockDialog(baseUI,{
                 _,block,_->
                 block?.let {
-                    item ->
-                    Context.protocol?.addBlock(item) ?: return@let
-                    blockList.updateUI()
+                    formatTable.updateUI()
                 }
             })
         }
@@ -69,8 +59,7 @@ class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<An
         delBtn.maximumSize = Dimension(80,30)
         delBtn.isEnabled = false
         delBtn.addActionListener {
-            Context.protocol?.removeBlock(blockList.selectedIndex)?: return@addActionListener
-            blockList.updateUI()
+            formatTable.updateUI()
             handleListSelectionEnable(true)
         }
         operatorPanel.add(delBtn)
@@ -80,9 +69,7 @@ class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<An
         upBtn.maximumSize = Dimension(80,30)
         upBtn.isEnabled = false
         upBtn.addActionListener {
-            Context.protocol?.swapBlock(blockList.selectedIndex,blockList.selectedIndex - 1) ?: return@addActionListener
-            blockList.selectedIndex = blockList.selectedIndex - 1
-            blockList.updateUI()
+            formatTable.updateUI()
         }
         operatorPanel.add(upBtn)
 
@@ -91,19 +78,17 @@ class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<An
         downBtn.maximumSize = Dimension(80,30)
         downBtn.isEnabled = false
         downBtn.addActionListener {
-            Context.protocol?.swapBlock(blockList.selectedIndex,blockList.selectedIndex + 1) ?: return@addActionListener
-            blockList.selectedIndex = blockList.selectedIndex + 1
-            blockList.updateUI()
+            formatTable.updateUI()
         }
         operatorPanel.add(downBtn)
 
-        blockList.model = BlockListModel(Context.protocol!!.blockList)
-        blockList.addListSelectionListener {
-            handleListSelectionEnable(false)
-        }
+//        formatTable.model = BlockListModel(Context.protocol!!.blockList)
+//        formatTable.addListSelectionListener {
+//            handleListSelectionEnable(false)
+//        }
 
         contentPane.layout = BorderLayout()
-        contentPane.add(blockList,BorderLayout.CENTER)
+        contentPane.add(formatTable,BorderLayout.CENTER)
         contentPane.add(operatorPanel,BorderLayout.EAST)
 
         isModal = true
@@ -112,10 +97,10 @@ class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<An
     }
 
     private fun handleListSelectionEnable(sizeChange : Boolean) {
-        if(!sizeChange && lastSelection == blockList.selectedIndex)
-            return
+//        if(!sizeChange && lastSelection == formatTable.selectedIndex)
+//            return
 
-        lastSelection = blockList.selectedIndex
+//        lastSelection = formatTable.selectedIndex
 
         val size = Context.protocol?.blockList?.size?: return
 
@@ -138,7 +123,7 @@ class EditBlockDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog<An
             downBtn.isEnabled = false
         }
         else if(lastSelection >= size) {
-            blockList.selectedIndex = -1
+//            formatTable.selectedIndex = -1
             delBtn.isEnabled = false
             editBtn.isEnabled = false
             upBtn.isEnabled = false

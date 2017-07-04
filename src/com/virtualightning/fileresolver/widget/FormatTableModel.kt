@@ -1,13 +1,12 @@
 package com.virtualightning.fileresolver.widget
 
-import com.virtualightning.fileresolver.entity.ByteData
-import com.virtualightning.fileresolver.environment.Context
+import com.virtualightning.fileresolver.entity.Format
 import com.virtualightning.fileresolver.environment.byteTableName
 import javax.swing.table.DefaultTableModel
 
 
-class ByteTableModel : DefaultTableModel() {
-    var byteDataList : ArrayList<ByteData>? = null
+class FormatTableModel : DefaultTableModel() {
+    var formatDataList: ArrayList<Format<*>>? = null
     set(value) {
         if(field != null)
             field!!.clear()
@@ -15,14 +14,8 @@ class ByteTableModel : DefaultTableModel() {
         field = value
     }
 
-    fun changeRadix() {
-        byteDataList!!.forEach {
-            it.changeRadix(Context.radix)
-        }
-    }
-
     override fun getRowCount(): Int {
-        return byteDataList?.size ?: 0
+        return formatDataList?.size ?: 0
     }
 
     override fun getColumnCount(): Int {
@@ -42,12 +35,9 @@ class ByteTableModel : DefaultTableModel() {
     }
 
     override fun getValueAt(row: Int, column: Int): Any {
-        val data = byteDataList!![row]
+        val data = formatDataList!![row]
 
         when(column) {
-            0->return data.locationStr!!
-            1->return data.byteStr!!
-            2->return data.ascii!!
         }
 
         return ""

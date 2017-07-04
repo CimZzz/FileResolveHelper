@@ -62,6 +62,9 @@ class BlockManagerDialog(baseUI : BaseUI,callback : ICallback<Any>) : BaseDialog
         editBtn.alignmentX = Component.CENTER_ALIGNMENT
         editBtn.maximumSize = Dimension(80,30)
         editBtn.isEnabled = false
+        editBtn.addActionListener {
+            EditBlockDialog(baseUI,Context.protocol!!.blockList[blockList.selectedIndex])
+        }
         operatorPanel.add(editBtn)
 
         delBtn = JButton("Delete")
