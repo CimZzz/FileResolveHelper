@@ -14,8 +14,8 @@ abstract class BaseDialog<E>(builder: UIBuilder,owner : BaseUI,var callBack : IC
     }
 
 
-    protected fun setResultAndQuit(result : Boolean,data : E? = null) {
-        callBack.invoke(result,data)
+    protected fun setResultAndQuit(result : Boolean,data : E? = null,msg : String? = null) {
+        callBack.invoke(result,data,msg)
         dispose()
     }
 }

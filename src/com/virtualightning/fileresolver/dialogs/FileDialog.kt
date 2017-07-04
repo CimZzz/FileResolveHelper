@@ -8,7 +8,7 @@ import java.awt.Dimension
 import javax.swing.JButton
 
 
-val builder = UIBuilder(
+private val builder = UIBuilder(
         uiName = "Select a file to decode",
         isResizeAble = false,
         size = Dimension(400,800)

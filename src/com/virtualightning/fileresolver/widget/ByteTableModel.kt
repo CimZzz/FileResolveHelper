@@ -1,15 +1,24 @@
 package com.virtualightning.fileresolver.widget
 
 import com.virtualightning.fileresolver.entity.ByteData
+import com.virtualightning.fileresolver.environment.Context
 import com.virtualightning.fileresolver.environment.tableName
 import javax.swing.table.DefaultTableModel
 
 
 class ByteTableModel : DefaultTableModel() {
     var byteDataList : ArrayList<ByteData>? = null
+    set(value) {
+        if(field != null)
+            field!!.clear()
 
-    fun setDataList(list : ArrayList<ByteData>) {
-        byteDataList = list
+        field = value
+    }
+
+    fun changeRadix() {
+        byteDataList!!.forEach {
+            it.changeRadix(Context.radix)
+        }
     }
 
     override fun getRowCount(): Int {
