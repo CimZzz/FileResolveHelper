@@ -7,7 +7,9 @@ import com.virtualightning.fileresolver.entity.Block
 import com.virtualightning.fileresolver.entity.Format
 import com.virtualightning.fileresolver.environment.Context
 import com.virtualightning.fileresolver.interfaces.NullCallback
+import com.virtualightning.fileresolver.utils.Info
 import com.virtualightning.fileresolver.widget.BlockListModel
+import com.virtualightning.fileresolver.widget.FormatTableModel
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Dimension
@@ -15,9 +17,9 @@ import javax.swing.*
 
 
 private val builder = UIBuilder(
-        uiName = "Block manager",
+        uiName = "Edit Block",
         isResizeAble = false,
-        size = Dimension(500,300)
+        size = Dimension(800,400)
 )
 
 class EditBlockDialog(baseUI : BaseUI,val block : Block) : BaseDialog<Any>(builder,baseUI,NullCallback) {
@@ -35,28 +37,32 @@ class EditBlockDialog(baseUI : BaseUI,val block : Block) : BaseDialog<Any>(build
         val operatorPanel = JPanel()
         operatorPanel.layout = BoxLayout(operatorPanel,BoxLayout.Y_AXIS)
 
-        newBtn = JButton("New")
+        val btnSize = Dimension(120,30)
+        newBtn = JButton("New by text")
         newBtn.alignmentX = Component.CENTER_ALIGNMENT
-        newBtn.maximumSize = Dimension(80,30)
+        newBtn.size = btnSize
+        newBtn.preferredSize = btnSize
+        newBtn.maximumSize = btnSize
         newBtn.addActionListener {
-            NewBlockDialog(baseUI,{
-                _,block,_->
-                block?.let {
-                    formatTable.updateUI()
-                }
+            NewFormatDialog(baseUI,{
+                _,format,_->
             })
         }
         operatorPanel.add(newBtn)
 
         editBtn = JButton("Edit")
         editBtn.alignmentX = Component.CENTER_ALIGNMENT
-        editBtn.maximumSize = Dimension(80,30)
+        editBtn.size = btnSize
+        editBtn.preferredSize = btnSize
+        editBtn.maximumSize = btnSize
         editBtn.isEnabled = false
         operatorPanel.add(editBtn)
 
         delBtn = JButton("Delete")
         delBtn.alignmentX = Component.CENTER_ALIGNMENT
-        delBtn.maximumSize = Dimension(80,30)
+        delBtn.size = btnSize
+        delBtn.preferredSize = btnSize
+        delBtn.maximumSize = btnSize
         delBtn.isEnabled = false
         delBtn.addActionListener {
             formatTable.updateUI()
@@ -66,7 +72,9 @@ class EditBlockDialog(baseUI : BaseUI,val block : Block) : BaseDialog<Any>(build
 
         upBtn = JButton("Up")
         upBtn.alignmentX = Component.CENTER_ALIGNMENT
-        upBtn.maximumSize = Dimension(80,30)
+        upBtn.size = btnSize
+        upBtn.preferredSize = btnSize
+        upBtn.maximumSize = btnSize
         upBtn.isEnabled = false
         upBtn.addActionListener {
             formatTable.updateUI()
@@ -75,7 +83,9 @@ class EditBlockDialog(baseUI : BaseUI,val block : Block) : BaseDialog<Any>(build
 
         downBtn = JButton("Down")
         downBtn.alignmentX = Component.CENTER_ALIGNMENT
-        downBtn.maximumSize = Dimension(80,30)
+        downBtn.size = btnSize
+        downBtn.preferredSize = btnSize
+        downBtn.maximumSize = btnSize
         downBtn.isEnabled = false
         downBtn.addActionListener {
             formatTable.updateUI()
@@ -88,8 +98,11 @@ class EditBlockDialog(baseUI : BaseUI,val block : Block) : BaseDialog<Any>(build
 //        }
 
         contentPane.layout = BorderLayout()
-        contentPane.add(formatTable,BorderLayout.CENTER)
+        contentPane.add(JScrollPane(formatTable),BorderLayout.CENTER)
         contentPane.add(operatorPanel,BorderLayout.EAST)
+        val model = FormatTableModel()
+        model.formatDataList = block.formatList
+        formatTable.model = model
 
         isModal = true
         setLocationRelativeTo(baseUI)
