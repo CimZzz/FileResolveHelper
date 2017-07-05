@@ -12,6 +12,7 @@ abstract class Format<E> (val formatName: String, val type : Byte) {
 
     abstract fun readDataFromBytes(byteArr : ByteArray,offset : Int)
     abstract fun sizeOfData() : Int
+    abstract fun typeName() : String
     abstract fun writeToFile(outputStream: DataOutputStream)
     abstract fun readFromFile(inputStream: DataInputStream)
 }

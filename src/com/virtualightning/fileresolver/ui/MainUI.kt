@@ -4,6 +4,7 @@ import com.virtualightning.fileresolver.base.BaseUI
 import com.virtualightning.fileresolver.base.UIBuilder
 import com.virtualightning.fileresolver.dialogs.BlockManagerDialog
 import com.virtualightning.fileresolver.dialogs.NewProtocolDialog
+import com.virtualightning.fileresolver.entity.Block
 import com.virtualightning.fileresolver.entity.Protocol
 import com.virtualightning.fileresolver.environment.*
 import com.virtualightning.fileresolver.utils.Info
@@ -389,6 +390,11 @@ class MainUI : BaseUI(builder) {
 
         container.add(topSplitPane)
 
+        /*TEST*/
+        val protocol = Protocol("HTTP")
+        protocol.addBlock(Block("Header"))
+        createNewProtocol(protocol)
+        /*TEST*/
 
         setLocationRelativeTo(null)
         isVisible = true

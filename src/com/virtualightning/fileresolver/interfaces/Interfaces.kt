@@ -10,3 +10,5 @@ object NullCallback : ICallback<Any> {
 }
 
 typealias IFilter =  (file : File?)->Boolean
+
+typealias

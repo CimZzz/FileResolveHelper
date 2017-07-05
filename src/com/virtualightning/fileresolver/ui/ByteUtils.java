@@ -1,7 +1,5 @@
 package com.virtualightning.fileresolver.ui;
 
-import java.nio.charset.Charset;
-
 public class ByteUtils {
 	
 	/*

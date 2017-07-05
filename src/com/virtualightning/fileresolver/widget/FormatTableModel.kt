@@ -2,28 +2,26 @@ package com.virtualightning.fileresolver.widget
 
 import com.virtualightning.fileresolver.entity.Format
 import com.virtualightning.fileresolver.environment.byteTableName
+import com.virtualightning.fileresolver.environment.formatTableName
 import javax.swing.table.DefaultTableModel
 
 
 class FormatTableModel : DefaultTableModel() {
     var formatDataList: ArrayList<Format<*>>? = null
     set(value) {
-        if(field != null)
-            field!!.clear()
-
         field = value
     }
 
     override fun getRowCount(): Int {
-        return formatDataList?.size ?: 0
+        return formatDataList?.size?:0
     }
 
     override fun getColumnCount(): Int {
-        return byteTableName.size
+        return formatTableName.size
     }
 
     override fun getColumnName(column: Int): String {
-        return byteTableName[column]
+        return formatTableName[column]
     }
 
     override fun getColumnClass(columnIndex: Int): Class<*> {
@@ -38,6 +36,10 @@ class FormatTableModel : DefaultTableModel() {
         val data = formatDataList!![row]
 
         when(column) {
+            0->return data.formatName
+            1->return data.typeName()
+            2->return "${data.sizeOfData()}"
+            3-> if(data.e == null) return "${data.e}"
         }
 
         return ""

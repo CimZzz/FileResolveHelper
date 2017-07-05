@@ -5,6 +5,10 @@ import java.io.DataInputStream
 import java.io.DataOutputStream
 
 class StringFormat(name : String) : Format<String>(name, TYPE_STRING) {
+    override fun typeName(): String {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     var charsetIndex : Byte = 0
     var length : Int = 0
 
