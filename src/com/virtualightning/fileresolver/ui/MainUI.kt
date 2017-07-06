@@ -14,6 +14,7 @@ import com.virtualightning.fileresolver.widget.ByteTableModel
 import com.virtualightning.fileresolver.widget.LeftTreeCellRenderer
 import java.awt.*
 import java.awt.event.KeyEvent
+import java.awt.event.KeyListener
 import java.io.File
 import javax.swing.*
 import javax.swing.tree.DefaultTreeModel
@@ -28,8 +29,6 @@ class MainUI : BaseUI(builder) {
     val closeMenuItem : MenuItem
 
     val saveProtocolItem : MenuItem
-    val parseBlockItem : MenuItem
-    val parseParamsItem : MenuItem
     val blockManageItem : MenuItem
 
     val dataTree : JTree
@@ -41,21 +40,19 @@ class MainUI : BaseUI(builder) {
     val curBitLabel : JLabel
     val radixSpinner : JSpinner
     val bytesShowCountsSpinner : JSpinner
-    val readBlockBtn : JButton
-    val readParamsBtn : JButton
     val byteTable : JTable
     val byteTableModel : ByteTableModel
+
+    val logArea : JTextArea
+    val logField : JTextField
 
     init {
         //Initialize menu bar
         val fileMenu = newMenu("File")
         newMenuItem("Open File",fileMenu,KeyEvent.VK_O).addActionListener Listener@{
             if(Context.isOpenFile) {
-                if (showWarnDialog("Open a new file causes the before file to close and the protocol data to miss,are you sure of that ? ", "Open file") == 2)
+                if (showWarnDialog("Are you sure of that ? ", "Open file") == 2)
                     return@Listener
-
-                if(Context.isHasProtocol)
-                    resetProtocol()
 
                 closeFile()
             }
@@ -67,10 +64,8 @@ class MainUI : BaseUI(builder) {
         closeMenuItem.isEnabled = false
         closeMenuItem.addActionListener Listener@{
             if(Context.isHasProtocol) {
-                if (showWarnDialog("Close file causes the protocol data to miss,are you sure of that ? ", "Close file") == 2)
+                if (showWarnDialog("Are you sure of that ? ", "Close file") == 2)
                     return@Listener
-
-                resetProtocol()
             }
 
             closeFile()
@@ -81,11 +76,9 @@ class MainUI : BaseUI(builder) {
         val operatorMenu = newMenu("Operator")
         newMenuItem("Create a protocol",operatorMenu,KeyEvent.VK_P).addActionListener Listener@ {
             if(Context.isHasProtocol) {
-                if(showWarnDialog("Create a new protocol causes the file to reset and the before protocol information to miss,are you sure of that ? ","Create a protocol") == 2) {
+                if(showWarnDialog("Create a new protocol causes the before protocol information to miss,are you sure of that ? ","Create a protocol") == 2) {
                     return@Listener
                 }
-                if(Context.isOpenFile)
-                    resetFile()
 
                 closeProtocol()
             }
@@ -98,7 +91,7 @@ class MainUI : BaseUI(builder) {
         }
         newMenuItem("Open a protocol",operatorMenu,KeyEvent.VK_L).addActionListener Listener@ {
             if(Context.isHasProtocol) {
-                if(showWarnDialog("Open a protocol causes the file to reset and the before protocol information to miss,are you sure of that ? ","Open a protocol") == 2) {
+                if(showWarnDialog("Open a protocol causes the before protocol information to miss,are you sure of that ? ","Open a protocol") == 2) {
                     return@Listener
                 }
                 if(Context.isOpenFile)
@@ -120,20 +113,6 @@ class MainUI : BaseUI(builder) {
                 _, _, _ ->
                 updateTree()
             })
-        }
-
-        operatorMenu.addSeparator()
-
-        parseBlockItem = newMenuItem("Parse next block",operatorMenu,KeyEvent.VK_F6)
-        parseBlockItem.isEnabled = false
-        parseBlockItem.addActionListener {
-            readBlock()
-        }
-
-        parseParamsItem = newMenuItem("Parse next params in block",operatorMenu,KeyEvent.VK_F7)
-        parseParamsItem.isEnabled = false
-        parseParamsItem.addActionListener {
-            readParams()
         }
 
 
@@ -333,37 +312,6 @@ class MainUI : BaseUI(builder) {
         gridLayout.setConstraints(radixSpinner,constraint)
         logPanel.add(radixSpinner)
 
-        val operatorPanel = JPanel()
-        constraint.gridx = 0
-        constraint.gridy = 4
-        constraint.gridwidth = 10
-        constraint.weightx = 0.0
-        constraint.weighty = 0.0
-        constraint.ipadx = 8
-        operatorPanel.layout = FlowLayout(FlowLayout.LEFT)
-        readBlockBtn = JButton("Read next block")
-        readBlockBtn.isEnabled = false
-        readBlockBtn.addActionListener {
-            readBlock()
-        }
-
-        readParamsBtn = JButton("Read next params")
-        readParamsBtn.isEnabled = false
-        readParamsBtn.addActionListener {
-            readParams()
-        }
-        operatorPanel.add(readBlockBtn)
-        operatorPanel.add(readParamsBtn)
-
-        gridLayout.setConstraints(operatorPanel,constraint)
-        logPanel.add(operatorPanel)
-
-
-
-
-
-
-
 
 
 
@@ -375,11 +323,48 @@ class MainUI : BaseUI(builder) {
         byteTableModel = ByteTableModel()
         byteTable.model = byteTableModel
 
+
+
+
+        val bottomPanel = JPanel()
+        bottomPanel.preferredSize = Dimension(0,200)
+        logArea = JTextArea()
+        logArea.background = Color(0x97,0x97,0x97)
+        logArea.foreground = Color.WHITE
+        logArea.isEditable = false
+
+        logField = JTextField()
+        logField.addKeyListener(object : KeyListener {
+            override fun keyTyped(e: KeyEvent?) {
+
+            }
+
+            override fun keyPressed(e: KeyEvent?) {
+            }
+
+            override fun keyReleased(e: KeyEvent?) {
+                if (e!!.keyCode == KeyEvent.VK_ENTER) {
+                    logArea.append("> ${logField.text}\n")
+                    logField.text = ""
+                }
+            }
+
+        })
+
+        bottomPanel.layout = BorderLayout()
+        bottomPanel.add(logArea,BorderLayout.CENTER)
+        bottomPanel.add(logField,BorderLayout.SOUTH)
+        bottomPanel.border = BorderFactory.createTitledBorder("控制台")
+
+
+
+
         rightPanel.layout = BorderLayout()
         rightPanel.add(logPanel,BorderLayout.NORTH)
         val bytesTablePane = JScrollPane(byteTable)
         bytesTablePane.isWheelScrollingEnabled = true
         rightPanel.add(bytesTablePane,BorderLayout.CENTER)
+        rightPanel.add(bottomPanel,BorderLayout.SOUTH)
 
         topSplitPane.leftComponent = leftPanel
         topSplitPane.rightComponent = rightPanel
@@ -389,18 +374,18 @@ class MainUI : BaseUI(builder) {
 
 
         container.add(topSplitPane)
-
-        /*TEST*/
-        val protocol = Protocol("HTTP")
-        protocol.addBlock(Block("Header"))
-        createNewProtocol(protocol)
-        /*TEST*/
+//
+//        /*TEST*/
+//        val protocol = Protocol("HTTP")
+//        protocol.addBlock(Block("Header"))
+//        createNewProtocol(protocol)
+//        /*TEST*/
 
         setLocationRelativeTo(null)
         isVisible = true
     }
 
-    private fun openFile(file :File) {
+    fun openFile(file :File) {
         if(!Context.openFile(file)) {
             showAlertDialog("Failed to open file , please try again","Open File Failed!")
             return
@@ -432,16 +417,14 @@ class MainUI : BaseUI(builder) {
         remainingByteLabel.text = "${Context.totalBytes}"
 
         Info("Open File : ${Context.selectFile!!.absolutePath}" )
-
-        checkBeginStatus()
     }
 
 
-    private fun resetFile() {
+    fun resetFile() {
 
     }
 
-    private fun closeFile() {
+    fun closeFile() {
         closeMenuItem.isEnabled = false
 
         bytesShowCountsSpinner.isEnabled = false
@@ -458,11 +441,9 @@ class MainUI : BaseUI(builder) {
 
         Info("Close File : ${Context.selectFile!!.absolutePath}")
         Context.closeFile()
-
-        checkEndStatus()
     }
 
-    private fun createNewProtocol(protocol: Protocol) {
+    fun createNewProtocol(protocol: Protocol) {
         Context.createNewProtocol(protocol)
 
         saveProtocolItem.isEnabled = true
@@ -470,41 +451,20 @@ class MainUI : BaseUI(builder) {
 
         dataTree.model = DefaultTreeModel(protocol.rootNode)
         dataTree.updateUI()
-
-        checkBeginStatus()
     }
 
-    private fun openProtocol(file : File) {
-        checkBeginStatus()
+    fun openProtocol(file : File) {
     }
 
-    private fun resetProtocol() {
+    fun resetProtocol() {
         Context.resetProtocol()
     }
 
-    private fun closeProtocol() {
+    fun closeProtocol() {
         saveProtocolItem.isEnabled = false
         blockManageItem.isEnabled = false
 
         Context.closeProtocol()
-        checkEndStatus()
-    }
-
-    private fun checkBeginStatus() {
-        if(!Context.isOpenFile || !Context.isHasProtocol)
-            return
-
-        readBlockBtn.isEnabled = true
-        readParamsBtn.isEnabled = true
-        parseBlockItem.isEnabled = true
-        parseParamsItem.isEnabled = true
-    }
-
-    private fun checkEndStatus() {
-        readBlockBtn.isEnabled = false
-        readParamsBtn.isEnabled = false
-        parseBlockItem.isEnabled = false
-        parseParamsItem.isEnabled = false
     }
 
     private fun changeByteCount(count : Int) {
@@ -534,15 +494,7 @@ class MainUI : BaseUI(builder) {
         Info(radix)
     }
 
-    private fun updateTree() {
+    fun updateTree() {
         dataTree.updateUI()
-    }
-
-    private fun readBlock() {
-        Info("Read Block")
-    }
-
-    private fun readParams() {
-        Info("Read Params In Block")
     }
 }

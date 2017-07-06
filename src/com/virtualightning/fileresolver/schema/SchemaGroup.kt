@@ -1,7 +1,5 @@
 package com.virtualightning.fileresolver.schema
 
-import com.virtualightning.fileresolver.base.BaseSchema
-
 class SchemaGroup(groupName : String, vararg schemas: BaseSchema) : BaseSchema(groupName) {
     private val schemaMap : HashMap<String, BaseSchema> = HashMap()
     private val rootNode : TreeNode = TreeNode()

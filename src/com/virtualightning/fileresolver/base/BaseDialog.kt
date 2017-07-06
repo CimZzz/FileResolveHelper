@@ -3,7 +3,7 @@ package com.virtualightning.fileresolver.base
 import com.virtualightning.fileresolver.interfaces.ICallback
 import javax.swing.*
 
-abstract class BaseDialog<E>(builder: UIBuilder,owner : BaseUI,var callBack : ICallback<E>) : JDialog(owner,builder.uiName) {
+abstract class BaseDialog<E>(builder: UIBuilder,owner : BaseUI?,var callBack : ICallback<E>) : JDialog(owner,builder.uiName) {
     init {
         isResizable = builder.isResizeAble
         size = builder.size

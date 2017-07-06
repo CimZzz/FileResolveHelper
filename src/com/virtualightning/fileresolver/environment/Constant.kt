@@ -6,8 +6,10 @@ import java.io.File
 import java.nio.charset.Charset
 
 val spaceCharInt = ' '.toInt()
+val commaCharInt = ','.toInt()
 val wrapCharInt = '\n'.toInt()
 val tabCharInt = '\t'.toInt()
+val eofCharInt = -1
 
 val byteCountArray = arrayOf(25,50,100,125)
 val radixArray = arrayOf("Binary","Decimal","Hexadecimal")
@@ -20,11 +22,15 @@ val fieldSchemasTree = SchemaGroup("Field")
 val blockSchemasTree = SchemaGroup("Block", fieldSchemasTree)
 val protocolSchemasTree = SchemaGroup("Protocol", blockSchemasTree)
 
+val orderArray = arrayOf("Big-Endian Order","Little-Endian Order")
+
+val intTypeArray = arrayOf("uint8","uint16","uint32","int64","int8","int16","int32")
+val intLengthTypeArray = arrayOf("bit","byte","other int format")
+
 val TYPE_PROTOCOL : Byte = 0
 val TYPE_BLOCK : Byte = 1
 val TYPE_FIELD : Byte = 2
 val TYPE_STRING : Byte = 3
 
-fun initConstant() {
-    Info(File(".").absolutePath)
-}
+
+val RESOLVE_ERROR = -1
