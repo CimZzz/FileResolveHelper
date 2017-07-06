@@ -1,5 +1,6 @@
 package com.virtualightning.fileresolver.interfaces
 
+import com.virtualightning.fileresolver.schema.BaseSchema
 import com.virtualightning.fileresolver.tools.CustomStringStream
 import java.io.File
 import java.io.StringReader
@@ -18,3 +19,4 @@ typealias IFilter =  (file : File?)->Boolean
 
 typealias IResolverCallback = (Int,Array<Any>?) -> Unit
 typealias IResolver = (reader : CustomStringStream) -> Boolean
+typealias IOperator =
