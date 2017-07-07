@@ -1,6 +1,16 @@
 package com.virtualightning.fileresolver.environment
 
+import com.virtualightning.fileresolver.schema.FieldSchema
 import com.virtualightning.fileresolver.schema.SchemaGroup
+import com.virtualightning.fileresolver.schema.SchemaTree
+import com.virtualightning.fileresolver.schema.operator.AddSchema
+import com.virtualightning.fileresolver.schema.operator.DivideSchema
+import com.virtualightning.fileresolver.schema.operator.MultiplySchema
+import com.virtualightning.fileresolver.schema.operator.SubtractSchema
+import com.virtualightning.fileresolver.schema.others.CommaSchema
+import com.virtualightning.fileresolver.schema.others.LeftBracketSchema
+import com.virtualightning.fileresolver.schema.others.RightBracketSchema
+import com.virtualightning.fileresolver.schema.values.BooleanValue
 import com.virtualightning.fileresolver.utils.Info
 import java.io.File
 import java.nio.charset.Charset
@@ -9,8 +19,27 @@ val spaceCharInt = ' '.toInt()
 val commaCharInt = ','.toInt()
 val wrapCharInt = '\n'.toInt()
 val tabCharInt = '\t'.toInt()
+val leftBracketCharInt = '('.toInt()
+val rightBracketCharInt = ')'.toInt()
+val quoteCharInt = '"'.toInt()
 val eofCharInt = -1
+val zeroCharInt = '0'.toInt()
+val oneCharInt = '1'.toInt()
+val nineCharInt = '9'.toInt()
+val aLowCharInt = 'a'.toInt()
+val nLowCharInt = 'n'.toInt()
+val aUpCharInt = 'A'.toInt()
+val zLowCharInt = 'z'.toInt()
+val zUpCharInt = 'Z'.toInt()
+val pointCharInt = '.'.toInt()
+val minusCharInt = '-'.toInt()
+val addCharInt = '+'.toInt()
+val multiCharInt = '*'.toInt()
+val divCharInt = '/'.toInt()
+val backSlashCharInt = '\\'.toInt()
 
+val operatorCharIntArray = arrayOf(minusCharInt, divCharInt, multiCharInt, addCharInt)
+val tenMultipleArray = arrayOf(10,100,1000,10000,100000,1000000)
 val byteCountArray = arrayOf(25,50,100,125)
 val radixArray = arrayOf("Binary","Decimal","Hexadecimal")
 val byteTableName = arrayOf("Address","Bytes","ASCII")
@@ -34,3 +63,25 @@ val TYPE_STRING : Byte = 3
 
 
 val RESOLVE_ERROR = -1
+val RESOLVE_SUCCESS = 0
+
+
+/*Schema Constant*/
+
+var trueField = FieldSchema("true", BooleanValue(true))
+var falseField = FieldSchema("false", BooleanValue(false))
+
+
+fun initSchemaTree() {
+    SchemaTree.addSchema(trueField)
+    SchemaTree.addSchema(falseField)
+
+    SchemaTree.addSchema(LeftBracketSchema)
+    SchemaTree.addSchema(RightBracketSchema)
+    SchemaTree.addSchema(CommaSchema)
+
+    SchemaTree.addSchema(AddSchema)
+    SchemaTree.addSchema(DivideSchema)
+    SchemaTree.addSchema(MultiplySchema)
+    SchemaTree.addSchema(SubtractSchema)
+}

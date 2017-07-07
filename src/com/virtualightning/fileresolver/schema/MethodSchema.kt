@@ -1,5 +1,8 @@
 package com.virtualightning.fileresolver.schema
 
-class MethodSchema(name : String) : BaseSchema(name) {
+import com.virtualightning.fileresolver.interfaces.IMethodCallback
+import com.virtualightning.fileresolver.schema.values.ValueSchema
 
+class MethodSchema(name : String,val callback : IMethodCallback) : BaseSchema(name) {
+    fun invoke(valueArr : MutableList<ValueSchema<*>>) : ValueSchema<*> = callback.invoke(valueArr)
 }
