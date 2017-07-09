@@ -1,7 +1,7 @@
 package com.virtualightning.fileresolver.schema.operator
 
-import com.virtualightning.fileresolver.schema.values.StringValue
-import com.virtualightning.fileresolver.schema.values.ValueSchema
+import com.virtualightning.fileresolver.schema.base.OperatorSchema
+import com.virtualightning.fileresolver.schema.base.ValueSchema
 
 
 object AddSchema : OperatorSchema("+") {

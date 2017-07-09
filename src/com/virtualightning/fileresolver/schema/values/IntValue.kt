@@ -1,6 +1,7 @@
 package com.virtualightning.fileresolver.schema.values
 
-import com.virtualightning.fileresolver.schema.exceptions.InvalidOperatorException
+import com.virtualightning.fileresolver.schema.base.ValueSchema
+import com.virtualightning.fileresolver.exceptions.InvalidOperatorException
 
 
 class IntValue(value : Int) : NumberValue<Int>(value) {
@@ -14,7 +15,7 @@ class IntValue(value : Int) : NumberValue<Int>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"+\"")
 
         if(level() >= otherSchema.level())
-            return IntValue(value!! + otherSchema.value!! as Int)
+            return IntValue(value!! + (otherSchema.value!! as Number).toInt())
         else return otherSchema.transfer(value!!).addValue(otherSchema)
     }
 
@@ -23,7 +24,7 @@ class IntValue(value : Int) : NumberValue<Int>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"-\"")
 
         if(level() >= otherSchema.level())
-            return IntValue(value!! - otherSchema.value!! as Int)
+            return IntValue(value!! - (otherSchema.value!! as Number).toInt())
         else return otherSchema.transfer(value!!).subValue(otherSchema)
     }
 
@@ -32,7 +33,7 @@ class IntValue(value : Int) : NumberValue<Int>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"*\"")
 
         if(level() >= otherSchema.level())
-            return IntValue(value!! * otherSchema.value!! as Int)
+            return IntValue(value!! * (otherSchema.value!! as Number).toInt())
         else return otherSchema.transfer(value!!).mulValue(otherSchema)
     }
 
@@ -41,7 +42,7 @@ class IntValue(value : Int) : NumberValue<Int>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"/\"")
 
         if(level() >= otherSchema.level())
-            return IntValue(value!! / otherSchema.value!! as Int)
+            return IntValue(value!! /(otherSchema.value!! as Number).toInt())
         else return otherSchema.transfer(value!!).divValue(otherSchema)
     }
 }

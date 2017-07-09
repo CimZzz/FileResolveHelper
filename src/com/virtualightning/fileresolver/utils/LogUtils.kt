@@ -4,7 +4,7 @@ import java.util.logging.Logger
 
 val logger = Logger.getLogger("FileResolverHelper")
 
-fun Wran(content : Any?) {
+fun Warn(content : Any?) {
     logger.warning(content.toString())
 }
 

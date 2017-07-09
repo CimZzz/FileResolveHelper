@@ -1,6 +1,7 @@
 package com.virtualightning.fileresolver.schema.values
 
-import com.virtualightning.fileresolver.schema.exceptions.InvalidOperatorException
+import com.virtualightning.fileresolver.schema.base.ValueSchema
+import com.virtualightning.fileresolver.exceptions.InvalidOperatorException
 
 
 class DoubleValue(value : Double) : NumberValue<Double>(value) {
@@ -13,10 +14,9 @@ class DoubleValue(value : Double) : NumberValue<Double>(value) {
     override fun addValue(otherSchema: ValueSchema<*>): ValueSchema<*> {
         if (otherSchema !is NumberValue)
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"+\"")
-            
 
         if(level() >= otherSchema.level())
-            return DoubleValue(value!! + otherSchema.value!! as Double)
+            return DoubleValue(value!! + (otherSchema.value!! as Number).toDouble() )
         else return otherSchema.transfer(value!!).addValue(otherSchema)
     }
 
@@ -25,7 +25,7 @@ class DoubleValue(value : Double) : NumberValue<Double>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"-\"")
 
         if(level() >= otherSchema.level())
-            return DoubleValue(value!! - otherSchema.value!! as Double)
+            return DoubleValue(value!! - (otherSchema.value!! as Number).toDouble())
         else return otherSchema.transfer(value!!).subValue(otherSchema)
     }
 
@@ -34,7 +34,7 @@ class DoubleValue(value : Double) : NumberValue<Double>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"*\"")
 
         if(level() >= otherSchema.level())
-            return DoubleValue(value!! * otherSchema.value!! as Double)
+            return DoubleValue(value!! * (otherSchema.value!! as Number).toDouble())
         else return otherSchema.transfer(value!!).mulValue(otherSchema)
     }
 
@@ -43,7 +43,7 @@ class DoubleValue(value : Double) : NumberValue<Double>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"/\"")
 
         if(level() >= otherSchema.level())
-            return DoubleValue(value!! / otherSchema.value!! as Double)
+            return DoubleValue(value!! / (otherSchema.value!! as Number).toDouble())
         else return otherSchema.transfer(value!!).divValue(otherSchema)
     }
 }

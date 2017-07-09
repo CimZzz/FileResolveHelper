@@ -4,14 +4,15 @@ import com.virtualightning.fileresolver.base.BaseUI
 import com.virtualightning.fileresolver.base.UIBuilder
 import com.virtualightning.fileresolver.dialogs.BlockManagerDialog
 import com.virtualightning.fileresolver.dialogs.NewProtocolDialog
-import com.virtualightning.fileresolver.entity.Block
 import com.virtualightning.fileresolver.entity.Protocol
 import com.virtualightning.fileresolver.environment.*
+import com.virtualightning.fileresolver.schema.syntax.FacadeSyntax
 import com.virtualightning.fileresolver.utils.Info
 import com.virtualightning.fileresolver.utils.newMenu
 import com.virtualightning.fileresolver.utils.newMenuItem
 import com.virtualightning.fileresolver.widget.ByteTableModel
 import com.virtualightning.fileresolver.widget.LeftTreeCellRenderer
+import com.virtualightning.fileresolver.widget.LogArea
 import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
@@ -38,12 +39,12 @@ class MainUI : BaseUI(builder) {
     val totalByteLabel : JLabel
     val remainingByteLabel: JLabel
     val curBitLabel : JLabel
-    val radixSpinner : JSpinner
-    val bytesShowCountsSpinner : JSpinner
+    val radixBox: JComboBox<String>
+    val bytesShowCountsBox: JComboBox<Int>
     val byteTable : JTable
     val byteTableModel : ByteTableModel
 
-    val logArea : JTextArea
+    val logArea : LogArea
     val logField : JTextField
 
     init {
@@ -268,12 +269,11 @@ class MainUI : BaseUI(builder) {
         gridLayout.setConstraints(tempLabel,constraint)
         logPanel.add(tempLabel)
 
-        bytesShowCountsSpinner = JSpinner()
-        bytesShowCountsSpinner.model = SpinnerListModel(byteCountArray)
-        bytesShowCountsSpinner.isEnabled = false
-        bytesShowCountsSpinner.addChangeListener {
+        bytesShowCountsBox = JComboBox(byteCountArray)
+        bytesShowCountsBox.isEnabled = false
+        bytesShowCountsBox.addItemListener {
             e->
-            changeByteCount((e.source as JSpinner).value as Int)
+            changeByteCount(e.item as Int)
         }
         constraint.gridx = 3
         constraint.gridy = 3
@@ -281,8 +281,8 @@ class MainUI : BaseUI(builder) {
         constraint.weightx = 0.0
         constraint.weighty = 0.0
         constraint.ipadx = 8
-        gridLayout.setConstraints(bytesShowCountsSpinner,constraint)
-        logPanel.add(bytesShowCountsSpinner)
+        gridLayout.setConstraints(bytesShowCountsBox,constraint)
+        logPanel.add(bytesShowCountsBox)
 
         tempLabel = JLabel()
         tempLabel.text = "Display Radix:"
@@ -295,13 +295,12 @@ class MainUI : BaseUI(builder) {
         gridLayout.setConstraints(tempLabel,constraint)
         logPanel.add(tempLabel)
 
-        radixSpinner = JSpinner()
-        radixSpinner.model = SpinnerListModel(radixArray)
-        radixSpinner.value = "Hexadecimal"
-        radixSpinner.isEnabled = false
-        radixSpinner.addChangeListener {
+        radixBox = JComboBox(radixArray)
+        radixBox.selectedItem = radixArray[2]
+        radixBox.isEnabled = false
+        radixBox.addItemListener {
             e->
-            changeRadix((e.source as JSpinner).value as String)
+            changeRadix(e.item as String)
         }
         constraint.gridx = 8
         constraint.gridy = 3
@@ -309,8 +308,8 @@ class MainUI : BaseUI(builder) {
         constraint.weightx = 1.0
         constraint.weighty = 0.0
         constraint.ipadx = 8
-        gridLayout.setConstraints(radixSpinner,constraint)
-        logPanel.add(radixSpinner)
+        gridLayout.setConstraints(radixBox,constraint)
+        logPanel.add(radixBox)
 
 
 
@@ -328,9 +327,8 @@ class MainUI : BaseUI(builder) {
 
         val bottomPanel = JPanel()
         bottomPanel.preferredSize = Dimension(0,200)
-        logArea = JTextArea()
-        logArea.background = Color(0x97,0x97,0x97)
-        logArea.foreground = Color.WHITE
+        logArea = LogArea()
+        logArea.background = Color(0x2F,0x2F,0x2F)
         logArea.isEditable = false
 
         logField = JTextField()
@@ -343,28 +341,34 @@ class MainUI : BaseUI(builder) {
             }
 
             override fun keyReleased(e: KeyEvent?) {
-                if (e!!.keyCode == KeyEvent.VK_ENTER) {
-                    logArea.append("> ${logField.text}\n")
-                    logField.text = ""
-                }
+                if(e == null)
+                    return
+
+                onLogFieldKeyEvent(e)
             }
 
         })
 
         bottomPanel.layout = BorderLayout()
-        bottomPanel.add(logArea,BorderLayout.CENTER)
+        bottomPanel.add(JScrollPane(logArea),BorderLayout.CENTER)
         bottomPanel.add(logField,BorderLayout.SOUTH)
         bottomPanel.border = BorderFactory.createTitledBorder("控制台")
 
 
-
-
         rightPanel.layout = BorderLayout()
         rightPanel.add(logPanel,BorderLayout.NORTH)
+
         val bytesTablePane = JScrollPane(byteTable)
         bytesTablePane.isWheelScrollingEnabled = true
-        rightPanel.add(bytesTablePane,BorderLayout.CENTER)
-        rightPanel.add(bottomPanel,BorderLayout.SOUTH)
+
+        val byteSplitPane = JSplitPane(JSplitPane.VERTICAL_SPLIT)
+        byteSplitPane.topComponent = bytesTablePane
+        byteSplitPane.bottomComponent = bottomPanel
+        byteSplitPane.isContinuousLayout = true
+        byteSplitPane.dividerLocation = 200
+        byteSplitPane.dividerSize = 1
+
+        rightPanel.add(byteSplitPane,BorderLayout.CENTER)
 
         topSplitPane.leftComponent = leftPanel
         topSplitPane.rightComponent = rightPanel
@@ -385,36 +389,69 @@ class MainUI : BaseUI(builder) {
         isVisible = true
     }
 
+    private fun onLogFieldKeyEvent(e : KeyEvent) {
+        when(e.keyCode) {
+            KeyEvent.VK_ENTER-> {
+                val command = logField.text
+                logArea.normal("> $command \n")
+                Context.pushQuickCommand(command)
+                FacadeSyntax.resolve(command,{
+                    code,msg->
+                    when(code) {
+                        SyntaxCallbackCode.SUCCESS -> logArea.success(msg)
+                        SyntaxCallbackCode.ERROR -> logArea.error(msg)
+                        SyntaxCallbackCode.CLEAR -> logArea.clear()
+                    }
+                })
+                logField.text = ""
+            }
+            KeyEvent.VK_UP-> {
+                val command = Context.forwardCommand()?:return
+                logField.text = command
+            }
+            KeyEvent.VK_DOWN-> {
+                val command = Context.nextCommand()?:return
+                logField.text = command
+            }
+        }
+    }
+
+    private fun updateFileShow() {
+        if(Context.isOpenFile) {
+            filePathLabel.text = Context.selectFile!!.absolutePath
+            curByteLabel.text = "${Context.currentBytes}"
+            curBitLabel.text = "${Context.currentBytes}"
+            totalByteLabel.text = "${Context.totalBytes}"
+            remainingByteLabel.text = "${Context.totalBytes}"
+            byteTableModel.byteDataList = Context.currentByteDataArr
+            byteTable.updateUI()
+        } else {
+            filePathLabel.text = "--"
+            curByteLabel.text = "--"
+            curBitLabel.text = "--"
+            totalByteLabel.text = "--"
+            remainingByteLabel.text = "--"
+            byteTableModel.byteDataList = null
+            byteTable.updateUI()
+        }
+    }
+
     fun openFile(file :File) {
         if(!Context.openFile(file)) {
             showAlertDialog("Failed to open file , please try again","Open File Failed!")
             return
         }
 
-        val byteDataList = Context.readBytes()
-
-        if(byteDataList == null) {
+        if(!Context.readBytes()) {
             Context.closeFile()
             showAlertDialog("Failed to open file , please try again","Open File Failed!")
             return
         }
 
 
-        byteTableModel.byteDataList = byteDataList
-        byteTableModel.changeRadix()
-        byteTable.updateUI()
-
-
         closeMenuItem.isEnabled = true
-
-        bytesShowCountsSpinner.isEnabled = true
-        radixSpinner.isEnabled = true
-
-        filePathLabel.text = file.absolutePath
-        curByteLabel.text = "${Context.currentBytes}"
-        curBitLabel.text = "8"
-        totalByteLabel.text = "${Context.totalBytes}"
-        remainingByteLabel.text = "${Context.totalBytes}"
+        bytesShowCountsBox.isEnabled = true
+        radixBox.isEnabled = true
 
         Info("Open File : ${Context.selectFile!!.absolutePath}" )
     }
@@ -427,17 +464,9 @@ class MainUI : BaseUI(builder) {
     fun closeFile() {
         closeMenuItem.isEnabled = false
 
-        bytesShowCountsSpinner.isEnabled = false
-        radixSpinner.isEnabled = false
+        bytesShowCountsBox.isEnabled = false
+        radixBox.isEnabled = false
 
-
-        filePathLabel.text = "--"
-        curByteLabel.text = "--"
-        curBitLabel.text = "--"
-        totalByteLabel.text = "--"
-        remainingByteLabel.text = "--"
-        byteTableModel.byteDataList = null
-        byteTable.updateUI()
 
         Info("Close File : ${Context.selectFile!!.absolutePath}")
         Context.closeFile()
@@ -471,15 +500,13 @@ class MainUI : BaseUI(builder) {
         val lastCount = Context.byteCounts
         Context.byteCounts = count
 
-        val byteDataList = Context.readBytes()
-
-        if(byteDataList == null) {
+        if(Context.readBytes()) {
             showAlertDialog("Failed to read bytes")
-            bytesShowCountsSpinner.value = lastCount
+            bytesShowCountsBox.selectedItem = lastCount
             return
         }
 
-        byteTableModel.byteDataList = byteDataList
+        byteTableModel.byteDataList = Context.currentByteDataArr
         byteTableModel.changeRadix()
         byteTable.updateUI()
 

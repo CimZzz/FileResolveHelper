@@ -1,5 +1,6 @@
 package com.virtualightning.fileresolver.schema.values
 
-abstract class NumberValue<E>(value : E) : ValueSchema<E>(value) {
-}
+import com.virtualightning.fileresolver.schema.base.ValueSchema
+
+abstract class NumberValue<E>(value : E) : ValueSchema<E>(value)
 

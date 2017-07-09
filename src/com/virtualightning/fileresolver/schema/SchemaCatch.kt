@@ -1,10 +1,11 @@
 package com.virtualightning.fileresolver.schema
 
 import com.virtualightning.fileresolver.environment.*
-import com.virtualightning.fileresolver.interfaces.ICharAnalyzer
-import com.virtualightning.fileresolver.schema.exceptions.DecimalException
-import com.virtualightning.fileresolver.schema.exceptions.NotFoundException
-import com.virtualightning.fileresolver.schema.exceptions.SyntaxException
+import com.virtualightning.fileresolver.schema.base.BaseSchema
+import com.virtualightning.fileresolver.exceptions.DecimalException
+import com.virtualightning.fileresolver.exceptions.SyntaxException
+import com.virtualightning.fileresolver.schema.others.EndSchema
+import com.virtualightning.fileresolver.schema.others.UndeclaredFieldSchema
 import com.virtualightning.fileresolver.schema.values.DoubleValue
 import com.virtualightning.fileresolver.schema.values.IntValue
 import com.virtualightning.fileresolver.schema.values.LongValue
@@ -15,12 +16,12 @@ object SchemaCatch {
     val CHAR_TYPE_FIELD = 0
     val CHAR_TYPE_STRING = 1
     val CHAR_TYPE_NUMBER = 2
+    val CHAR_TYPE_NULL = 3
 
     var breakPoint = eofCharInt
     var matchStr = ""
     var charType = CHAR_TYPE_FIELD
-    var curNode = SchemaTree.rootNode
-    var schema : BaseSchema? = null
+    var curNode : SchemaTree.TreeNode? = SchemaTree.rootNode
     var isContinue = true
     var isNeedBack = false
 
@@ -38,26 +39,31 @@ object SchemaCatch {
     val facadeAnalyzer : ICharAnalyzer = {
         when(it) {
             spaceCharInt->Unit
+            eofCharInt-> {
+                charType = CHAR_TYPE_NULL
+                isContinue = false
+            }
             leftBracketCharInt-> {
-                curNode = curNode.childMap[it]!!
-                schema = curNode.schema
+                curNode = curNode!!.childMap[it]!!
                 isContinue = false
             }
             rightBracketCharInt-> {
-                curNode = curNode.childMap[it]!!
-                schema = curNode.schema
+                curNode = curNode!!.childMap[it]!!
                 isContinue = false
                 matchStr += it
             }
             commaCharInt-> {
-                curNode = curNode.childMap[it]!!
-                schema = curNode.schema
+                curNode = curNode!!.childMap[it]!!
+                isContinue = false
+                matchStr += it
+            }
+            equalCharInt-> {
+                curNode = curNode!!.childMap[it]!!
                 isContinue = false
                 matchStr += it
             }
             in operatorCharIntArray-> {
-                curNode = curNode.childMap[it]!!
-                schema = curNode.schema
+                curNode = curNode!!.childMap[it]!!
                 isContinue = false
                 matchStr += it
             }
@@ -164,7 +170,7 @@ object SchemaCatch {
                 else {
                     if(decimalCount > 6)
                         throw DecimalException("Can't have more than six decimal")
-                    integer += num / tenMultipleArray[decimalCount - 1]
+                    integer += num * 1.0 / tenMultipleArray[decimalCount - 1]
                     decimalCount ++
                 }
 
@@ -209,8 +215,10 @@ object SchemaCatch {
         if(isContinue) {
             if(nameCount >= 20)
                 throw SyntaxException("Field name length cannot more than 20")
-            curNode = curNode.childMap[it] ?: throw NotFoundException("Field not found")
+            curNode = curNode?.childMap?.get(it)
             nameCount ++
+
+            matchStr += it.toChar()
         }
 
     }
@@ -230,7 +238,7 @@ object SchemaCatch {
             reader.back()
 
         when(charType) {
-            CHAR_TYPE_FIELD->if(curNode.schema != null) return curNode.schema!! else throw NotFoundException("Not found field : $matchStr")
+            CHAR_TYPE_FIELD->return curNode?.schema?: UndeclaredFieldSchema
             CHAR_TYPE_NUMBER-> {
                 val is64BitNum = integer > 0x7FFFFFFF
                 if(isDecimal)
@@ -241,7 +249,8 @@ object SchemaCatch {
                     else return IntValue(integer.toInt())
                 }
             }
-            else->return StringValue()
+            CHAR_TYPE_NULL->return EndSchema
+            else->return StringValue(matchStr)
         }
     }
 
@@ -253,7 +262,6 @@ object SchemaCatch {
         matchStr = ""
         charType = CHAR_TYPE_FIELD
         curNode = SchemaTree.rootNode
-        schema = null
         isContinue = true
         isNeedBack = false
         isEscape = false

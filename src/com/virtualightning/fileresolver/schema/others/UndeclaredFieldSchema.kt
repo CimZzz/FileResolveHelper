@@ -2,4 +2,4 @@ package com.virtualightning.fileresolver.schema.others
 
 import com.virtualightning.fileresolver.schema.base.BaseSchema
 
-object RightBracketSchema : BaseSchema(")")
+object UndeclaredFieldSchema : BaseSchema("")

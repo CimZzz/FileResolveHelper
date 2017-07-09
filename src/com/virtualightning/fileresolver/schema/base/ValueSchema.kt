@@ -1,8 +1,7 @@
-package com.virtualightning.fileresolver.schema.values
+package com.virtualightning.fileresolver.schema.base
 
-import com.virtualightning.fileresolver.schema.BaseSchema
-
-abstract class ValueSchema<E>(var value : E? = null) : BaseSchema("") {
+abstract class ValueSchema<E>(var value : E? = null) : ComputableSchema("") {
+    var isConstantValue = true
 
     abstract fun addValue(otherSchema : ValueSchema<*>) : ValueSchema<*>
     abstract fun subValue(otherSchema : ValueSchema<*>) : ValueSchema<*>

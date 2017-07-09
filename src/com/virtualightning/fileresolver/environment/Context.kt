@@ -1,9 +1,8 @@
 package com.virtualightning.fileresolver.environment
 
 import com.virtualightning.fileresolver.entity.ByteData
-import com.virtualightning.fileresolver.entity.ObserverEvent
 import com.virtualightning.fileresolver.entity.Protocol
-import com.virtualightning.fileresolver.utils.Wran
+import com.virtualightning.fileresolver.utils.Warn
 import java.io.*
 import java.util.*
 
@@ -25,6 +24,11 @@ object Context {
     var currentBytes : Long = -1
     var remainBits : Int = -1
     var remainBitCount : Int = -1
+    var currentByteDataArr = ArrayList<ByteData>(125)
+
+
+    var quickCommandIndex = -1
+    var quickCommandList : LinkedList<String> = LinkedList()
 
     @JvmStatic
     fun openFile(selectFile : File) : Boolean {
@@ -38,16 +42,16 @@ object Context {
         } catch (e : Exception) {
             this.selectFile = null
             inputStream = null
-            Wran(e)
+            Warn(e)
             return false
         }
     }
 
     @JvmStatic
-    fun readBytes() : ArrayList<ByteData>? {
+    fun readBytes() : Boolean {
         inputStream!!.seek(currentBytes - 1)
+        currentByteDataArr.clear()
         var currentBytesTemp = currentBytes
-        val newList = ArrayList<ByteData>(byteCounts)
         try {
             for (i in 1..byteCounts) {
                 var tempByte = inputStream!!.read()
@@ -58,14 +62,21 @@ object Context {
                     tempByte = (tempByte ushr remainBitCount) or (remainBits shl (8 - remainBitCount))
                     remainBits = nextRemainBits
                 }
-                newList.add(ByteData(currentBytesTemp,tempByte))
+                val byteData = ByteData(currentBytesTemp,tempByte)
+                byteData.changeRadix(radix)
+                currentByteDataArr.add(byteData)
                 currentBytesTemp ++
             }
-        } catch (e : Exception) {
-            return null
-        }
 
-        return newList
+            return true
+        } catch (e : Exception) {
+            return false
+        }
+    }
+
+    @JvmStatic
+    fun changeByteCount(count : Int) {
+
     }
 
     @JvmStatic
@@ -82,9 +93,10 @@ object Context {
                 inputStream = null
             }
         } catch (e : Exception) {
-            Wran(e)
+            Warn(e)
         }
     }
+
 
 
 
@@ -113,5 +125,38 @@ object Context {
 
         this.protocol!!.destroy()
         isHasProtocol = true
+    }
+
+
+
+    @JvmStatic
+    fun pushQuickCommand(str : String) {
+        quickCommandIndex = -1
+        quickCommandList.push(str)
+        if(quickCommandList.size > QUICK_COMMAND_CAPTAIN)
+            quickCommandList.removeLast()
+    }
+
+    @JvmStatic
+    fun forwardCommand() : String? {
+        if(quickCommandList.size == 0)
+            return null
+
+        if(quickCommandIndex == quickCommandList.size || quickCommandIndex == -1)
+            quickCommandIndex = 0
+        else quickCommandIndex++
+
+        return quickCommandList[quickCommandIndex]
+    }
+
+    @JvmStatic
+    fun nextCommand() : String? {
+        if(quickCommandList.size == 0)
+            return null
+        if(quickCommandIndex <= 0)
+            quickCommandIndex = quickCommandList.size - 1
+        else quickCommandIndex--
+
+        return quickCommandList[quickCommandIndex]
     }
 }

@@ -1,6 +1,7 @@
 package com.virtualightning.fileresolver.schema.values
 
-import com.virtualightning.fileresolver.schema.exceptions.InvalidOperatorException
+import com.virtualightning.fileresolver.schema.base.ValueSchema
+import com.virtualightning.fileresolver.exceptions.InvalidOperatorException
 
 class StringValue(value : String? = null) : ValueSchema<String>(value) {
     override fun type(): String = "String"

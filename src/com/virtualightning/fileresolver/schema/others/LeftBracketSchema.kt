@@ -1,6 +1,5 @@
 package com.virtualightning.fileresolver.schema.others
 
-import com.virtualightning.fileresolver.schema.BaseSchema
+import com.virtualightning.fileresolver.schema.base.ComputableSchema
 
-object LeftBracketSchema : BaseSchema("(") {
-}
+object LeftBracketSchema : ComputableSchema("(")

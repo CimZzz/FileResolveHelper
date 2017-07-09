@@ -1,6 +1,7 @@
 package com.virtualightning.fileresolver.schema.values
 
-import com.virtualightning.fileresolver.schema.exceptions.InvalidOperatorException
+import com.virtualightning.fileresolver.schema.base.ValueSchema
+import com.virtualightning.fileresolver.exceptions.InvalidOperatorException
 
 
 class LongValue(value : Long) : NumberValue<Long>(value) {
@@ -15,7 +16,7 @@ class LongValue(value : Long) : NumberValue<Long>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"+\"")
 
         if(level() >= otherSchema.level())
-            return LongValue(value!! + otherSchema.value!! as Long)
+            return LongValue(value!! + (otherSchema.value!! as Number).toLong())
         else return otherSchema.transfer(value!!).addValue(otherSchema)
     }
 
@@ -24,7 +25,7 @@ class LongValue(value : Long) : NumberValue<Long>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"+\"")
 
         if(level() >= otherSchema.level())
-            return LongValue(value!! - otherSchema.value!! as Long)
+            return LongValue(value!! - (otherSchema.value!! as Number).toLong())
         else return otherSchema.transfer(value!!).subValue(otherSchema)
     }
 
@@ -33,7 +34,7 @@ class LongValue(value : Long) : NumberValue<Long>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"*\"")
 
         if(level() >= otherSchema.level())
-            return LongValue(value!! * otherSchema.value!! as Long)
+            return LongValue(value!! * (otherSchema.value!! as Number).toLong())
         else return otherSchema.transfer(value!!).mulValue(otherSchema)
     }
 
@@ -42,7 +43,7 @@ class LongValue(value : Long) : NumberValue<Long>(value) {
             throw InvalidOperatorException("${otherSchema.type()} cannot supported operator \"/\"")
 
         if(level() >= otherSchema.level())
-            return LongValue(value!! / otherSchema.value!! as Long)
+            return LongValue(value!! / (otherSchema.value!! as Number).toLong())
         else return otherSchema.transfer(value!!).divValue(otherSchema)
     }
 }

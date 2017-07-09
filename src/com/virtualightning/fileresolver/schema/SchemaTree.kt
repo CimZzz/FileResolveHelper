@@ -1,5 +1,7 @@
 package com.virtualightning.fileresolver.schema
 
+import com.virtualightning.fileresolver.schema.base.BaseSchema
+
 object SchemaTree {
     val rootNode : TreeNode = TreeNode(null,-1)
 
