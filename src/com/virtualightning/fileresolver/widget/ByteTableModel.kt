@@ -2,27 +2,25 @@ package com.virtualightning.fileresolver.widget
 
 import com.virtualightning.fileresolver.entity.ByteData
 import com.virtualightning.fileresolver.environment.Context
+import com.virtualightning.fileresolver.environment.SourceProxy
 import com.virtualightning.fileresolver.environment.byteTableName
+import java.util.*
 import javax.swing.table.DefaultTableModel
 
 
-class ByteTableModel : DefaultTableModel() {
-    var byteDataList : ArrayList<ByteData>? = null
-    set(value) {
-        if(field != null)
-            field!!.clear()
+class ByteTableModel(var byteDataList : LinkedList<ByteData>) : DefaultTableModel() {
 
-        field = value
-    }
 
     fun changeRadix() {
-        byteDataList!!.forEach {
-            it.changeRadix(Context.radix)
+        byteDataList.forEach {
+            it.changeRadix(SourceProxy.radix)
         }
     }
 
     override fun getRowCount(): Int {
-        return byteDataList?.size ?: 0
+        if(byteDataList == null)
+            return 0
+        if(byteDataList.size > SourceProxy.byteCounts) return SourceProxy.byteCounts else return byteDataList.size
     }
 
     override fun getColumnCount(): Int {
@@ -42,7 +40,7 @@ class ByteTableModel : DefaultTableModel() {
     }
 
     override fun getValueAt(row: Int, column: Int): Any {
-        val data = byteDataList!![row]
+        val data = byteDataList[row]
 
         when(column) {
             0->return data.locationStr!!

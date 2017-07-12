@@ -5,6 +5,7 @@ import com.virtualightning.fileresolver.schema.SchemaTree
 import com.virtualightning.fileresolver.schema.base.BaseSchema
 import com.virtualightning.fileresolver.schema.base.MethodSchema
 import com.virtualightning.fileresolver.schema.base.ValueSchema
+import com.virtualightning.fileresolver.schema.definedMethod
 import com.virtualightning.fileresolver.schema.members.NonReturnMethodSchema
 import com.virtualightning.fileresolver.schema.operator.AddSchema
 import com.virtualightning.fileresolver.schema.operator.DivideSchema
@@ -125,15 +126,5 @@ fun initSchemaTree() {
     SchemaTree.addSchema(MultiplySchema)
     SchemaTree.addSchema(SubtractSchema)
 
-    SchemaTree.addSchema(NonReturnMethodSchema("skip",{
-        method,args->
-        println("skip params length : $args")
-        null
-    }))
-
-    SchemaTree.addSchema(NonReturnMethodSchema("clear",{
-        method,args->
-        method.checkArgumentLength(args,0)
-        SyntaxCallbackCode.CLEAR
-    }))
+    definedMethod()
 }

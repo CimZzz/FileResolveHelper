@@ -7,6 +7,7 @@ import com.virtualightning.fileresolver.exceptions.DecimalException
 import com.virtualightning.fileresolver.exceptions.NullPointerException
 import com.virtualightning.fileresolver.schema.members.FieldSchema
 import com.virtualightning.fileresolver.schema.members.ReturnMethodSchema
+import com.virtualightning.fileresolver.schema.operator.SubtractSchema
 import com.virtualightning.fileresolver.schema.others.CommaSchema
 import com.virtualightning.fileresolver.schema.others.LeftBracketSchema
 import com.virtualightning.fileresolver.schema.others.RightBracketSchema

@@ -8,4 +8,9 @@ abstract class MethodSchema(schemaName : String) : BaseSchema(schemaName) {
         if( (isLessThan && argLength > length) || (!isLessThan && argLength != length) )
             throw MethodException("Method arguments length are not valid : $schemaName() must have ${if(isLessThan)"at least " else ""}$length arguments")
     }
+
+    fun valueNullException() : Unit = throw MethodException("Method params value don't be null")
+    fun repeatValueException(value : Any) : Unit = throw MethodException("Method params value repeat : $value")
+    fun unknownValueException(value : Any) : Unit = throw MethodException("Method params value unknown : $value")
+    fun runException(msg : String) : Unit = throw MethodException("Method run error : $msg")
 }

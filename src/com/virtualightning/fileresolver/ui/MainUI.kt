@@ -4,8 +4,10 @@ import com.virtualightning.fileresolver.base.BaseUI
 import com.virtualightning.fileresolver.base.UIBuilder
 import com.virtualightning.fileresolver.dialogs.BlockManagerDialog
 import com.virtualightning.fileresolver.dialogs.NewProtocolDialog
+import com.virtualightning.fileresolver.entity.ByteData
 import com.virtualightning.fileresolver.entity.Protocol
 import com.virtualightning.fileresolver.environment.*
+import com.virtualightning.fileresolver.proxies.FileReadable
 import com.virtualightning.fileresolver.schema.syntax.FacadeSyntax
 import com.virtualightning.fileresolver.utils.Info
 import com.virtualightning.fileresolver.utils.newMenu
@@ -17,8 +19,10 @@ import java.awt.*
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.io.File
+import java.util.*
 import javax.swing.*
 import javax.swing.tree.DefaultTreeModel
+import kotlin.collections.ArrayList
 
 private val builder = UIBuilder(
         uiName = "FileResolverHelper",
@@ -38,7 +42,7 @@ class MainUI : BaseUI(builder) {
     val curByteLabel : JLabel
     val totalByteLabel : JLabel
     val remainingByteLabel: JLabel
-    val curBitLabel : JLabel
+    val remainBitLabel: JLabel
     val radixBox: JComboBox<String>
     val bytesShowCountsBox: JComboBox<Int>
     val byteTable : JTable
@@ -92,15 +96,11 @@ class MainUI : BaseUI(builder) {
         }
         newMenuItem("Open a protocol",operatorMenu,KeyEvent.VK_L).addActionListener Listener@ {
             if(Context.isHasProtocol) {
-                if(showWarnDialog("Open a protocol causes the before protocol information to miss,are you sure of that ? ","Open a protocol") == 2) {
+                if (showWarnDialog("Open a protocol causes the before protocol information to miss,are you sure of that ? ", "Open a protocol") == 2) {
                     return@Listener
                 }
-                if(Context.isOpenFile)
-                    resetFile()
-
                 closeProtocol()
             }
-
             openProtocol(openFileDialog()?:return@Listener)
         }
         saveProtocolItem = newMenuItem("Save protocol",operatorMenu,KeyEvent.VK_N)
@@ -224,16 +224,16 @@ class MainUI : BaseUI(builder) {
         gridLayout.setConstraints(tempLabel,constraint)
         logPanel.add(tempLabel)
 
-        curBitLabel = JLabel()
-        curBitLabel.text = "--"
+        remainBitLabel = JLabel()
+        remainBitLabel.text = "--"
         constraint.gridx = 3
         constraint.gridy = 2
         constraint.gridwidth = 2
         constraint.weightx = 1.0
         constraint.weighty = 0.0
         constraint.ipadx = 8
-        gridLayout.setConstraints(curBitLabel,constraint)
-        logPanel.add(curBitLabel)
+        gridLayout.setConstraints(remainBitLabel,constraint)
+        logPanel.add(remainBitLabel)
 
         tempLabel = JLabel()
         tempLabel.text = "Remaining Bytes:"
@@ -319,7 +319,7 @@ class MainUI : BaseUI(builder) {
 
 
         byteTable = JTable()
-        byteTableModel = ByteTableModel()
+        byteTableModel = ByteTableModel(SourceProxy.byteDataArray)
         byteTable.model = byteTableModel
 
 
@@ -382,6 +382,42 @@ class MainUI : BaseUI(builder) {
 
         SourceProxy.callback = {
             code,any->
+            when(code) {
+                AbstractReadableCallbackCode.TOTAL_LENGTH->{
+                    val value = any as Long
+                    if(value == -1L)
+                        totalByteLabel.text = "--"
+                    else totalByteLabel.text = "$value"
+                }
+                AbstractReadableCallbackCode.CURRENT_POSITION->{
+                    val value = any as Long
+                    if(value == -1L)
+                        curByteLabel.text = "--"
+                    else curByteLabel.text = "$value"
+                }
+                AbstractReadableCallbackCode.REMAIN_BYTE_COUNT->{
+                    val value = any as Long
+                    if(value == -1L)
+                        remainingByteLabel.text = "--"
+                    else remainingByteLabel.text = "$value"
+                }
+                AbstractReadableCallbackCode.REMAIN_BIT_COUNT->{
+                    val value = any as Int
+                    if(value == -1)
+                        remainBitLabel.text = "--"
+                    else remainBitLabel.text = "$value"
+                }
+                AbstractReadableCallbackCode.UPDATE_DATA_TABLE-> byteTable.updateUI()
+                AbstractReadableCallbackCode.CLEAR-> {
+                    totalByteLabel.text = "--"
+                    curByteLabel.text = "--"
+                    remainingByteLabel.text = "--"
+                    remainBitLabel.text = "--"
+                    filePathLabel.text = "--"
+                    byteTable.updateUI()
+                }
+                AbstractReadableCallbackCode.ERROR->showAlertDialog(any as String,"Error")
+            }
 
         }
 
@@ -416,62 +452,29 @@ class MainUI : BaseUI(builder) {
         }
     }
 
-
-    private fun updateFileShow() {
-        if(Context.isOpenFile) {
-            filePathLabel.text = Context.selectFile!!.absolutePath
-            curByteLabel.text = "${Context.currentBytes}"
-            curBitLabel.text = "${Context.currentBytes}"
-            totalByteLabel.text = "${Context.totalBytes}"
-            remainingByteLabel.text = "${Context.totalBytes}"
-            byteTableModel.byteDataList = Context.currentByteDataArr
-            byteTable.updateUI()
-        } else {
-            filePathLabel.text = "--"
-            curByteLabel.text = "--"
-            curBitLabel.text = "--"
-            totalByteLabel.text = "--"
-            remainingByteLabel.text = "--"
-            byteTableModel.byteDataList = null
-            byteTable.updateUI()
-        }
-    }
+    /* Source */
 
     fun openFile(file :File) {
-        if(!Context.openFile(file)) {
-            showAlertDialog("Failed to open file , please try again","Open File Failed!")
-            return
+        if(SourceProxy.openSource(FileReadable(file))) {
+            filePathLabel.text = file.absolutePath
+            closeMenuItem.isEnabled = true
+            bytesShowCountsBox.isEnabled = true
+            radixBox.isEnabled = true
+
+            logArea.system("Open file : ${file.absolutePath}")
         }
-
-        if(!Context.readBytes()) {
-            Context.closeFile()
-            showAlertDialog("Failed to open file , please try again","Open File Failed!")
-            return
-        }
-
-
-        closeMenuItem.isEnabled = true
-        bytesShowCountsBox.isEnabled = true
-        radixBox.isEnabled = true
-
-        Info("Open File : ${Context.selectFile!!.absolutePath}" )
-    }
-
-
-    fun resetFile() {
-
     }
 
     fun closeFile() {
+        SourceProxy.closeSource()
         closeMenuItem.isEnabled = false
-
         bytesShowCountsBox.isEnabled = false
         radixBox.isEnabled = false
 
-
-        Info("Close File : ${Context.selectFile!!.absolutePath}")
-        Context.closeFile()
+        logArea.system("Closed file")
     }
+
+    /* Protocol */
 
     fun createNewProtocol(protocol: Protocol) {
         Context.createNewProtocol(protocol)
@@ -486,10 +489,6 @@ class MainUI : BaseUI(builder) {
     fun openProtocol(file : File) {
     }
 
-    fun resetProtocol() {
-        Context.resetProtocol()
-    }
-
     fun closeProtocol() {
         saveProtocolItem.isEnabled = false
         blockManageItem.isEnabled = false
@@ -497,29 +496,20 @@ class MainUI : BaseUI(builder) {
         Context.closeProtocol()
     }
 
+
+
+
+
+
     private fun changeByteCount(count : Int) {
-        val lastCount = Context.byteCounts
-        Context.byteCounts = count
-
-        if(Context.readBytes()) {
-            showAlertDialog("Failed to read bytes")
-            bytesShowCountsBox.selectedItem = lastCount
-            return
-        }
-
-        byteTableModel.byteDataList = Context.currentByteDataArr
-        byteTableModel.changeRadix()
+        SourceProxy.byteCounts = count
         byteTable.updateUI()
-
-        Info(count)
     }
+
     private fun changeRadix(radix : String) {
-        Context.radix = radix
+        SourceProxy.radix = radix
         byteTableModel.changeRadix()
         byteTable.updateUI()
-
-
-        Info(radix)
     }
 
     fun updateTree() {
