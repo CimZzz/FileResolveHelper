@@ -378,12 +378,12 @@ class MainUI : BaseUI(builder) {
 
 
         container.add(topSplitPane)
-//
-//        /*TEST*/
-//        val protocol = Protocol("HTTP")
-//        protocol.addBlock(Block("Header"))
-//        createNewProtocol(protocol)
-//        /*TEST*/
+
+
+        SourceProxy.callback = {
+            code,any->
+
+        }
 
         setLocationRelativeTo(null)
         isVisible = true
@@ -394,7 +394,7 @@ class MainUI : BaseUI(builder) {
             KeyEvent.VK_ENTER-> {
                 val command = logField.text
                 logArea.normal("> $command \n")
-                Context.pushQuickCommand(command)
+                QuickCommand.pushQuickCommand(command)
                 FacadeSyntax.resolve(command,{
                     code,msg->
                     when(code) {
@@ -406,15 +406,16 @@ class MainUI : BaseUI(builder) {
                 logField.text = ""
             }
             KeyEvent.VK_UP-> {
-                val command = Context.forwardCommand()?:return
+                val command = QuickCommand.forwardCommand()?:return
                 logField.text = command
             }
             KeyEvent.VK_DOWN-> {
-                val command = Context.nextCommand()?:return
+                val command = QuickCommand.nextCommand()?:return
                 logField.text = command
             }
         }
     }
+
 
     private fun updateFileShow() {
         if(Context.isOpenFile) {

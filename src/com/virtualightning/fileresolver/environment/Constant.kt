@@ -80,12 +80,13 @@ object SyntaxCallbackCode {
 val remainBitFlagArray = arrayOf(0x0,0x1,0x3,0x7,0xF,0x1F,0x3F,0x7F,0xFF)
 typealias IFileReadableCallback = (Int, Any) -> Unit
 object AbstractReadableCallbackCode {
-    @JvmStatic
+    val ERROR = -1
     val TOTAL_LENGTH = 0
     val CURRENT_POSITION = 1
     val REMAIN_BIT_COUNT = 2
     val REMAIN_BYTE_COUNT = 3
     val CLEAR = 4
+    val UPDATE_DATA_TABLE = 5
 }
 
 

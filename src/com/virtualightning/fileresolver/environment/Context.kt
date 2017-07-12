@@ -10,9 +10,6 @@ import java.util.*
 object Context {
     var isOpenFile = false
     var isHasProtocol = false
-
-
-
     var protocol : Protocol? = null
 
 
@@ -27,8 +24,6 @@ object Context {
     var currentByteDataArr = ArrayList<ByteData>(125)
 
 
-    var quickCommandIndex = -1
-    var quickCommandList : LinkedList<String> = LinkedList()
 
     @JvmStatic
     fun openFile(selectFile : File) : Boolean {
@@ -127,36 +122,10 @@ object Context {
         isHasProtocol = true
     }
 
-
-
-    @JvmStatic
-    fun pushQuickCommand(str : String) {
-        quickCommandIndex = -1
-        quickCommandList.push(str)
-        if(quickCommandList.size > QUICK_COMMAND_CAPTAIN)
-            quickCommandList.removeLast()
+    object QuickCommand {
     }
 
-    @JvmStatic
-    fun forwardCommand() : String? {
-        if(quickCommandList.size == 0)
-            return null
+    object ByteSource {
 
-        if(quickCommandIndex == quickCommandList.size || quickCommandIndex == -1)
-            quickCommandIndex = 0
-        else quickCommandIndex++
-
-        return quickCommandList[quickCommandIndex]
-    }
-
-    @JvmStatic
-    fun nextCommand() : String? {
-        if(quickCommandList.size == 0)
-            return null
-        if(quickCommandIndex <= 0)
-            quickCommandIndex = quickCommandList.size - 1
-        else quickCommandIndex--
-
-        return quickCommandList[quickCommandIndex]
     }
 }

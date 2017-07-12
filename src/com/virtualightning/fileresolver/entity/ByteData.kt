@@ -3,7 +3,7 @@ package com.virtualightning.fileresolver.entity
 import com.virtualightning.fileresolver.environment.completionArray
 
 
-class ByteData(
+open class ByteData(
         val location : Long,
         val byte : Int
 ) {
@@ -29,7 +29,7 @@ class ByteData(
         return field
     }
 
-    fun changeRadix(radix : String) {
+    open fun changeRadix(radix : String) {
         val str : String
         when(radix) {
             "Binary"-> {
