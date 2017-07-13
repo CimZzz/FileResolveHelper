@@ -330,6 +330,7 @@ class MainUI : BaseUI(builder) {
         logArea = LogArea()
         logArea.background = Color(0x2F,0x2F,0x2F)
         logArea.isEditable = false
+        logArea.autoscrolls = true
 
         logField = JTextField()
         logField.addKeyListener(object : KeyListener {

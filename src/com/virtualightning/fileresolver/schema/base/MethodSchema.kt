@@ -13,4 +13,5 @@ abstract class MethodSchema(schemaName : String) : BaseSchema(schemaName) {
     fun repeatValueException(value : Any) : Unit = throw MethodException("Method params value repeat : $value")
     fun unknownValueException(value : Any) : Unit = throw MethodException("Method params value unknown : $value")
     fun runException(msg : String) : Unit = throw MethodException("Method run error : $msg")
+    fun paramsLengthException(need:String,real:Int) : Unit = throw MethodException("Method params length wrong , need : $need , real : $real")
 }

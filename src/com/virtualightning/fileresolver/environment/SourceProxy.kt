@@ -77,15 +77,15 @@ object SourceProxy {
     }
 
 
-    fun seekPosition(newPosition: Long) {
+    fun seekPosition(newPosition: Long) : Long {
         if(!isOpenFile)
             throw MethodException("Seek failed ! Cause file closed")
 
-        if(newPosition >= totalLength || newPosition < 0)
+        if(newPosition > totalLength || newPosition < 0)
             throw MethodException("Seek failed ! Cause new position is over than total length")
 
-        this.source!!.seek(newPosition)
-        currentPosition = newPosition - 1
+        this.source!!.seek(newPosition - 1)
+        return newPosition - currentPosition
     }
 
 
@@ -120,14 +120,20 @@ object SourceProxy {
                 }
             }
             else -> {
-                if(movePosition >= 125) {
+                if(movePosition >= 125  || movePosition <= -125) {
                     tempBufferSize = this.source!!.readByteArray(tempByteArray,0, tempByteArray.size)
                 } else {
                     val intPosition = movePosition.toInt()
-                    tempBufferSize -= intPosition
-                    System.arraycopy(byteArray,intPosition,tempByteArray,0,tempBufferSize)
-                    if(tempBufferSize + currentPosition < totalLength)
-                        tempBufferSize += this.source!!.readByteArray(tempByteArray,tempBufferSize, 125 - tempBufferSize)
+                    if(movePosition > 0) {
+                        tempBufferSize -= intPosition
+                        System.arraycopy(byteArray, intPosition, tempByteArray, 0, tempBufferSize)
+                        if (tempBufferSize + currentPosition < totalLength)
+                            tempBufferSize += this.source!!.readByteArray(tempByteArray, tempBufferSize, 125 - tempBufferSize)
+                    } else {
+                        tempBufferSize += intPosition
+                        System.arraycopy(byteArray, 0, tempByteArray, -intPosition, tempBufferSize)
+                        tempBufferSize += this.source!!.readByteArray(tempByteArray, 0, 125 - tempBufferSize)
+                    }
                 }
 
                 this.source!!.seek(currentPosition - 1)

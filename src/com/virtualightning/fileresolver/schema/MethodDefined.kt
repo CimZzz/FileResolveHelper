@@ -15,11 +15,36 @@ fun definedMethod() {
         SyntaxCallbackCode.CLEAR
     }))
 
+    SchemaTree.addSchema(NonReturnMethodSchema("seek",{
+        method,args->
+        if (args.size != 1)
+            method.paramsLengthException("1",args.size)
+
+        var newPosition : Long = 0
+        val value = args[0].value?:method.valueNullException()
+        when(value) {
+            is Int->newPosition = value.toLong()
+            is Long->newPosition = value
+            else->method.unknownValueException(value)
+        }
+
+        val movePosition = SourceProxy.seekPosition(newPosition)
+
+        val msg : String
+        if(movePosition >= 0)
+            msg = "Backward $movePosition Bytes"
+        else msg = "Forward $movePosition Bytes"
+
+        SourceProxy.updatePosition(movePosition,true)
+        msg
+    }))
 
     SchemaTree.addSchema(ReturnMethodSchema("readInt",{
         method,args->
         var length : Int? = null
         var isBigEndian : Boolean? = null
+        if (args.size >= 3)
+            method.paramsLengthException("unless 2",args.size)
         args.forEach {
             val value = it.value?:method.valueNullException()
             when(value) {
