@@ -19,7 +19,7 @@ object QuickCommand {
         if(quickCommandList.size == 0)
             return null
 
-        if(quickCommandIndex == quickCommandList.size || quickCommandIndex == -1)
+        if(quickCommandIndex == quickCommandList.size - 1 || quickCommandIndex == -1)
             quickCommandIndex = 0
         else quickCommandIndex++
 

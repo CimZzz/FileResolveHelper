@@ -3,7 +3,7 @@ package com.virtualightning.fileresolver.entity
 import com.virtualightning.fileresolver.environment.completionArray
 
 
-class RemainByteData(location : Long, byte : Int , remainSize : Int) : ByteData(location,byte) {
+class BitData(location : Long , byte : Int, remainSize : Int) : ByteData(location,byte) {
     init{
         ascii = ' '
         var str = java.lang.Integer.toBinaryString(byte)

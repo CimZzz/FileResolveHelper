@@ -44,8 +44,15 @@ fun definedMethod() {
 
         val buffer = ByteArray(length!!)
         val readSize = SourceProxy.readBytes(buffer)
-        if(readSize < length!!)
+        if(readSize < length!!) {
+            SourceProxy.updatePosition(-1,false)
             method.runException("Require size is $length , but read size is only $readSize")
+        }
+        else if(readSize > 4) {
+            SourceProxy.updatePosition(-1,false)
+            method.runException("Max size is 4 , but read size is $readSize")
+        }
+        SourceProxy.updatePosition(readSize.toLong(),true)
 
         IntValue(ByteUtils.byteConvertInt(buffer,isBigEndian!!))
     }))

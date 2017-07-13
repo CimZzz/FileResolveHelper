@@ -4,8 +4,8 @@ import com.virtualightning.fileresolver.environment.completionArray
 
 
 open class ByteData(
-        val location : Long,
-        val byte : Int
+        var location : Long = 0,
+        var byte : Int = 0
 ) {
     var locationStr : String? = null
     get() {

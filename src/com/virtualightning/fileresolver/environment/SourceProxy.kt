@@ -1,12 +1,10 @@
 package com.virtualightning.fileresolver.environment
 
 import com.virtualightning.fileresolver.entity.ByteData
-import com.virtualightning.fileresolver.entity.RemainByteData
+import com.virtualightning.fileresolver.entity.BitData
 import com.virtualightning.fileresolver.exceptions.MethodException
 import com.virtualightning.fileresolver.proxies.AbstractReadable
-import sun.security.util.Length
 import java.util.*
-import kotlin.experimental.and
 
 
 object SourceProxy {
@@ -24,6 +22,7 @@ object SourceProxy {
     var remainBitCount : Int = -1
     val byteArray = ByteArray(125)
     val byteDataArray = LinkedList<ByteData>()
+    var bufferSize = 0
 
 
     fun openSource(abstractReadable: AbstractReadable) : Boolean {
@@ -38,7 +37,7 @@ object SourceProxy {
                 remainBits = 0
                 remainBitCount = 8
                 currentPosition = 1
-                readShowBytes(-1)
+                readShowBytes(1,125L)
             } else {
                 currentPosition = 0
                 remainBits = -1
@@ -61,7 +60,7 @@ object SourceProxy {
     fun readBytes(byteArray: ByteArray,isMovePosition : Boolean = true) : Int {
         if(!isOpenFile)
             throw MethodException("Read failed ! Cause file closed")
-
+        this.source!!.seek(currentPosition - 1)
         var remainSize = byteArray.size
         var totalReadLength = 0
         var curReadLength : Int
@@ -73,13 +72,6 @@ object SourceProxy {
             remainSize -= curReadLength
             totalReadLength += curReadLength
         } while (remainSize != 0)
-
-        this.source!!.seek(currentPosition - 1)
-        if(isMovePosition) {
-            readShowBytes(currentPosition + totalReadLength.toLong())
-            callback!!.invoke(AbstractReadableCallbackCode.CURRENT_POSITION, currentPosition)
-            callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BYTE_COUNT, totalLength - currentPosition)
-        }
 
         return totalReadLength
     }
@@ -96,52 +88,69 @@ object SourceProxy {
         currentPosition = newPosition - 1
     }
 
-    private fun readShowBytes(newPosition : Long) {
-        val abstractReadable = this.source!!
 
-        if(currentPosition == newPosition) {
-            if(remainBitCount != 8) {
-                byteDataArray[0] = RemainByteData(currentPosition - 1, remainBits, remainBitCount)
+
+    fun updatePosition(movePosition: Long,isMovePosition: Boolean) {
+        if(!isMovePosition) {
+            this.source!!.seek(currentPosition - 1)
+            return
+        }
+
+
+        val newPosition = currentPosition + movePosition
+
+        if(newPosition > totalLength + 1 || newPosition <= 0)
+            throw MethodException("Wrong position : $newPosition")
+
+        readShowBytes(newPosition,movePosition)
+        currentPosition = newPosition
+        callback!!.invoke(AbstractReadableCallbackCode.CURRENT_POSITION, currentPosition)
+        callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BYTE_COUNT, totalLength - currentPosition)
+    }
+
+    private fun readShowBytes(currentPosition : Long,movePosition : Long) {
+        val tempByteArray = ByteArray(125)
+        var tempBufferSize : Int = bufferSize
+        when(movePosition) {
+            0L -> {
+                if(remainBitCount != 8) {
+                    byteArray[0] = remainBits.toByte()
+                    ByteDataCache.cacheByteData(byteDataArray.poll())
+                    byteDataArray.push(BitData(currentPosition, remainBits, remainBitCount))
+                }
+            }
+            else -> {
+                if(movePosition >= 125) {
+                    tempBufferSize = this.source!!.readByteArray(tempByteArray,0, tempByteArray.size)
+                } else {
+                    val intPosition = movePosition.toInt()
+                    tempBufferSize -= intPosition
+                    System.arraycopy(byteArray,intPosition,tempByteArray,0,tempBufferSize)
+                    if(tempBufferSize + currentPosition < totalLength)
+                        tempBufferSize += this.source!!.readByteArray(tempByteArray,tempBufferSize, 125 - tempBufferSize)
+                }
+
+                this.source!!.seek(currentPosition - 1)
             }
         }
-        else {
-            var movePosition : Int
-            var position : Long = newPosition
 
-            if(position == -1L) {
-                position = 1
-                movePosition = 125
+        if(movePosition != 0L) {
+            byteDataArray.forEach {
+                ByteDataCache.cacheByteData(it)
             }
-            else {
-                movePosition = (position - currentPosition).toInt()
-                if(movePosition > 125)
-                    movePosition = 125
-            }
-
-            if(movePosition >= byteDataArray.size)
-                byteDataArray.clear()
-            else (0 until movePosition).forEach { byteDataArray.poll() }
-
-
-            if(remainBitCount != 8) {
-                movePosition --
-                byteDataArray[0] = RemainByteData(position, remainBits, remainBitCount)
-            }
-
-            val readSize = abstractReadable.readByteArray(byteArray,0,movePosition)
-            (0 until readSize).forEach {
-                val byteData = ByteData(position++ - 1, byteArray[it].toInt() and 0xFF)
+            byteDataArray.clear()
+            (0 until tempBufferSize).forEach {
+                val byteData = ByteDataCache.getByteData()
+                byteData.byte = tempByteArray[it].toInt() and 0xFF
+                byteData.location = currentPosition + it
+                byteData.locationStr = null
+                byteData.ascii = null
                 byteData.changeRadix(radix)
                 byteDataArray.add(byteData)
             }
+            System.arraycopy(tempByteArray,0, byteArray,0,tempBufferSize)
+            bufferSize = tempBufferSize
         }
-
-        if(newPosition != -1L) {
-            abstractReadable.seek(newPosition - 1)
-            currentPosition = newPosition
-        } else abstractReadable.seek(0)
-
-
         //通知更新
         callback!!.invoke(AbstractReadableCallbackCode.UPDATE_DATA_TABLE, Unit)
     }
