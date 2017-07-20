@@ -18,8 +18,8 @@ object SourceProxy {
     var source : AbstractReadable? = null
     var totalLength: Long = -1
     var currentPosition: Long = -1
-    var remainBits : Int = -1
-    var remainBitCount : Int = -1
+//    var remainBits : Int = -1
+//    var remainBitCount : Int = -1
     val byteArray = ByteArray(125)
     val byteDataArray = LinkedList<ByteData>()
     var bufferSize = 0
@@ -34,19 +34,19 @@ object SourceProxy {
 
 
             if (totalLength != 0L) {
-                remainBits = 0
-                remainBitCount = 8
+//                remainBits = 0
+//                remainBitCount = 8
                 currentPosition = 1
                 readShowBytes(1,125L)
             } else {
                 currentPosition = 0
-                remainBits = -1
-                remainBitCount = -1
+//                remainBits = -1
+//                remainBitCount = -1
             }
 
             callback!!.invoke(AbstractReadableCallbackCode.TOTAL_LENGTH, totalLength)
             callback!!.invoke(AbstractReadableCallbackCode.CURRENT_POSITION, currentPosition)
-            callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BIT_COUNT, remainBitCount)
+//            callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BIT_COUNT, remainBitCount)
             callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BYTE_COUNT, totalLength)
             isOpenFile = true
             return true
@@ -77,6 +77,15 @@ object SourceProxy {
     }
 
 
+    fun back(movePosition: Long) : Long {
+        return seekPosition(currentPosition - movePosition)
+    }
+
+
+    fun skip(movePosition: Long) : Long {
+        return seekPosition(currentPosition + movePosition)
+    }
+
     fun seekPosition(newPosition: Long) : Long {
         if(!isOpenFile)
             throw MethodException("Seek failed ! Cause file closed")
@@ -105,7 +114,7 @@ object SourceProxy {
         readShowBytes(newPosition,movePosition)
         currentPosition = newPosition
         callback!!.invoke(AbstractReadableCallbackCode.CURRENT_POSITION, currentPosition)
-        callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BYTE_COUNT, totalLength - currentPosition)
+        callback!!.invoke(AbstractReadableCallbackCode.REMAIN_BYTE_COUNT, totalLength - currentPosition + 1)
     }
 
     private fun readShowBytes(currentPosition : Long,movePosition : Long) {
@@ -113,11 +122,11 @@ object SourceProxy {
         var tempBufferSize : Int = bufferSize
         when(movePosition) {
             0L -> {
-                if(remainBitCount != 8) {
-                    byteArray[0] = remainBits.toByte()
-                    ByteDataCache.cacheByteData(byteDataArray.poll())
-                    byteDataArray.push(BitData(currentPosition, remainBits, remainBitCount))
-                }
+//                if(remainBitCount != 8) {
+//                    byteArray[0] = remainBits.toByte()
+//                    ByteDataCache.cacheByteData(byteDataArray.poll())
+//                    byteDataArray.push(BitData(currentPosition, remainBits, remainBitCount))
+//                }
             }
             else -> {
                 if(movePosition >= 125  || movePosition <= -125) {
@@ -130,9 +139,17 @@ object SourceProxy {
                         if (tempBufferSize + currentPosition < totalLength)
                             tempBufferSize += this.source!!.readByteArray(tempByteArray, tempBufferSize, 125 - tempBufferSize)
                     } else {
-                        tempBufferSize += intPosition
-                        System.arraycopy(byteArray, 0, tempByteArray, -intPosition, tempBufferSize)
-                        tempBufferSize += this.source!!.readByteArray(tempByteArray, 0, 125 - tempBufferSize)
+//                        tempBufferSize += intPosition
+                        var endPosition = tempBufferSize - intPosition
+                        if(endPosition > 125) {
+                            endPosition = 125 + intPosition
+                            tempBufferSize -= endPosition
+                        }
+                        else endPosition = tempBufferSize
+
+                        println("TempSize : $tempBufferSize , IntPosition : $intPosition")
+                        System.arraycopy(byteArray, 0, tempByteArray, -intPosition, endPosition)
+                        tempBufferSize += this.source!!.readByteArray(tempByteArray, 0, -intPosition)
                     }
                 }
 
@@ -161,15 +178,15 @@ object SourceProxy {
         callback!!.invoke(AbstractReadableCallbackCode.UPDATE_DATA_TABLE, Unit)
     }
 
-    private fun composeBit(remainBit : Int,newByte : Int) : Int {
-        var compositeByte = remainBitFlagArray[8 - remainBitCount] and newByte
-        compositeByte = (compositeByte ushr remainBitCount) or (remainBit shl (8 - remainBitCount))
-        return compositeByte
-    }
-
-    private fun cutBit(newByte: Int) : Int {
-        return remainBitFlagArray[remainBitCount] and newByte
-    }
+//    private fun composeBit(remainBit : Int,newByte : Int) : Int {
+//        var compositeByte = remainBitFlagArray[8 - remainBitCount] and newByte
+//        compositeByte = (compositeByte ushr remainBitCount) or (remainBit shl (8 - remainBitCount))
+//        return compositeByte
+//    }
+//
+//    private fun cutBit(newByte: Int) : Int {
+//        return remainBitFlagArray[remainBitCount] and newByte
+//    }
 
 
 

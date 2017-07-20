@@ -33,7 +33,55 @@ fun definedMethod() {
         val msg : String
         if(movePosition >= 0)
             msg = "Backward $movePosition Bytes"
-        else msg = "Forward $movePosition Bytes"
+        else msg = "Forward ${-movePosition} Bytes"
+
+        SourceProxy.updatePosition(movePosition,true)
+        msg
+    }))
+
+    SchemaTree.addSchema(NonReturnMethodSchema("back",{
+        method,args->
+        if (args.size != 1)
+            method.paramsLengthException("1",args.size)
+
+        var movePosition : Long = 0
+        val value = args[0].value?:method.valueNullException()
+        when(value) {
+            is Int->movePosition = value.toLong()
+            is Long->movePosition = value
+            else->method.unknownValueException(value)
+        }
+
+        movePosition = SourceProxy.back(movePosition)
+
+        val msg : String
+        if(movePosition >= 0)
+            msg = "Backward $movePosition Bytes"
+        else msg = "Forward ${-movePosition} Bytes"
+
+        SourceProxy.updatePosition(movePosition,true)
+        msg
+    }))
+
+    SchemaTree.addSchema(NonReturnMethodSchema("skip",{
+        method,args->
+        if (args.size != 1)
+            method.paramsLengthException("1",args.size)
+
+        var movePosition : Long = 0
+        val value = args[0].value?:method.valueNullException()
+        when(value) {
+            is Int->movePosition = value.toLong()
+            is Long->movePosition = value
+            else->method.unknownValueException(value)
+        }
+
+        movePosition = SourceProxy.skip(movePosition)
+
+        val msg : String
+        if(movePosition >= 0)
+            msg = "Backward $movePosition Bytes"
+        else msg = "Forward ${-movePosition} Bytes"
 
         SourceProxy.updatePosition(movePosition,true)
         msg

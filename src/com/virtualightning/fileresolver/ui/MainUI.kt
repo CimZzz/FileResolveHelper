@@ -42,7 +42,7 @@ class MainUI : BaseUI(builder) {
     val curByteLabel : JLabel
     val totalByteLabel : JLabel
     val remainingByteLabel: JLabel
-    val remainBitLabel: JLabel
+//    val remainBitLabel: JLabel
     val radixBox: JComboBox<String>
     val bytesShowCountsBox: JComboBox<Int>
     val byteTable : JTable
@@ -213,33 +213,33 @@ class MainUI : BaseUI(builder) {
         gridLayout.setConstraints(totalByteLabel,constraint)
         logPanel.add(totalByteLabel)
 
-        tempLabel = JLabel()
-        tempLabel.text = "Remaining Bits Of Current Byte:"
-        constraint.gridx = 0
-        constraint.gridy = 2
-        constraint.gridwidth = 3
-        constraint.weightx = 0.0
-        constraint.weighty = 0.0
-        constraint.ipadx = 8
-        gridLayout.setConstraints(tempLabel,constraint)
-        logPanel.add(tempLabel)
+//        tempLabel = JLabel()
+//        tempLabel.text = "Remaining Bits Of Current Byte:"
+//        constraint.gridx = 0
+//        constraint.gridy = 2
+//        constraint.gridwidth = 3
+//        constraint.weightx = 0.0
+//        constraint.weighty = 0.0
+//        constraint.ipadx = 8
+//        gridLayout.setConstraints(tempLabel,constraint)
+//        logPanel.add(tempLabel)
 
-        remainBitLabel = JLabel()
-        remainBitLabel.text = "--"
-        constraint.gridx = 3
-        constraint.gridy = 2
-        constraint.gridwidth = 2
-        constraint.weightx = 1.0
-        constraint.weighty = 0.0
-        constraint.ipadx = 8
-        gridLayout.setConstraints(remainBitLabel,constraint)
-        logPanel.add(remainBitLabel)
+//        remainBitLabel = JLabel()
+//        remainBitLabel.text = "--"
+//        constraint.gridx = 3
+//        constraint.gridy = 2
+//        constraint.gridwidth = 2
+//        constraint.weightx = 1.0
+//        constraint.weighty = 0.0
+//        constraint.ipadx = 8
+//        gridLayout.setConstraints(remainBitLabel,constraint)
+//        logPanel.add(remainBitLabel)
 
         tempLabel = JLabel()
         tempLabel.text = "Remaining Bytes:"
-        constraint.gridx = 5
+        constraint.gridx = 0
         constraint.gridy = 2
-        constraint.gridwidth = 3
+        constraint.gridwidth = 2
         constraint.weightx = 0.0
         constraint.weighty = 0.0
         constraint.ipadx = 8
@@ -248,9 +248,9 @@ class MainUI : BaseUI(builder) {
 
         remainingByteLabel = JLabel()
         remainingByteLabel.text = "--"
-        constraint.gridx = 8
+        constraint.gridx = 2
         constraint.gridy = 2
-        constraint.gridwidth = 2
+        constraint.gridwidth = 8
         constraint.weightx = 1.0
         constraint.weighty = 0.0
         constraint.ipadx = 8
@@ -402,18 +402,18 @@ class MainUI : BaseUI(builder) {
                         remainingByteLabel.text = "--"
                     else remainingByteLabel.text = "$value"
                 }
-                AbstractReadableCallbackCode.REMAIN_BIT_COUNT->{
-                    val value = any as Int
-                    if(value == -1)
-                        remainBitLabel.text = "--"
-                    else remainBitLabel.text = "$value"
-                }
+//                AbstractReadableCallbackCode.REMAIN_BIT_COUNT->{
+//                    val value = any as Int
+//                    if(value == -1)
+//                        remainBitLabel.text = "--"
+//                    else remainBitLabel.text = "$value"
+//                }
                 AbstractReadableCallbackCode.UPDATE_DATA_TABLE-> byteTable.updateUI()
                 AbstractReadableCallbackCode.CLEAR-> {
                     totalByteLabel.text = "--"
                     curByteLabel.text = "--"
                     remainingByteLabel.text = "--"
-                    remainBitLabel.text = "--"
+//                    remainBitLabel.text = "--"
                     filePathLabel.text = "--"
                     byteTable.updateUI()
                 }
