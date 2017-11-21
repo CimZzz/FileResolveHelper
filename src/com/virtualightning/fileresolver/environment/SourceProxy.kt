@@ -76,6 +76,9 @@ object SourceProxy {
         return totalReadLength
     }
 
+    fun getRemainedBytes() : Long {
+        return totalLength - currentPosition
+    }
 
     fun back(movePosition: Long) : Long {
         return seekPosition(currentPosition - movePosition)
